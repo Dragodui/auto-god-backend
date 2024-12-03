@@ -9,8 +9,8 @@ A forum for auto owners
 #    Download and install Node.js from https://nodejs.org if it’s not already installed.
 
 # 2. Clone the repository
-git clone https://github.com/your-repo/project-name.git
-cd project-name
+git clone https://github.com/Dragodui/auto-god-backend.git
+cd auto-god-backend
 
 # 3. Install dependencies
 # Using Yarn
