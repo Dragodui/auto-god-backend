@@ -8,7 +8,6 @@ export const createPost = async (
 ): Promise<void> => {
   try {
     const { title, content, userId } = req.body;
-    // const userId = req.session.id;
     if (!title || !content || !userId) {
       res.status(400).json({ message: 'Please provide all fields' });
     }
