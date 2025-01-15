@@ -5,6 +5,7 @@ import comparePasswords from '../utils/comparePasswords';
 import { Request, Response } from 'express';
 import { IUser } from '../interfaces';
 import mongoose from 'mongoose';
+import { generateAccessToken } from './../utils/generateToken';
 
 export const register = async (req: Request, res: Response) => {
   console.log('Registering new user...');
@@ -23,7 +24,6 @@ export const register = async (req: Request, res: Response) => {
     await newUser.save();
     console.log('New user created!');
 
-    const secret = process.env.ACCESS_TOKEN_SECRET as Secret;
     const secret = process.env.ACCESS_TOKEN_SECRET as Secret;
     const token = jwt.sign({ id: newUser._id }, secret, {
       expiresIn: '30d',
