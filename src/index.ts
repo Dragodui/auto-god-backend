@@ -5,7 +5,7 @@ import MongoStore = require('connect-mongo');
 import session from 'express-session';
 import './database/index';
 import postRouter from './routes/posts';
-import User from './database/models/User';
+import cors from 'cors';
 
 config();
 
@@ -13,7 +13,7 @@ const app: Express = express();
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
-  mongoUrl: 'mongodb://localhost:27017/auto-god',
+  mongoUrl: 'mongodb://127.0.0.1:27017/auto-god',
 });
 
 app.use(
@@ -25,6 +25,11 @@ app.use(
     cookie: { secure: false },
   })
 );
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  credentials: true,
+}
+));
 
 app.use('/api/auth', authRouter);
 app.use('/api/posts', postRouter);

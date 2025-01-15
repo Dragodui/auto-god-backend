@@ -10,7 +10,7 @@ const checkAuth = (req: Request, res: Response, next: NextFunction): void => {
   }
 
   try {
-    const secret: Secret = process.env.JWT_TOKEN as Secret;
+    const secret: Secret = process.env.ACCESS_TOKEN_SECRET as Secret;
     const decoded = jwt.verify(token, secret);
     if (typeof decoded === 'string') {
       req.body.userId = decoded;

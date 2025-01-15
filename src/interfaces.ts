@@ -2,6 +2,7 @@ import mongoose, { Model } from 'mongoose';
 import { Document } from 'mongoose';
 
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
   email: string;
   nickname?: string;
   name: string;

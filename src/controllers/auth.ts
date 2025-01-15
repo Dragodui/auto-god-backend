@@ -5,6 +5,7 @@ import jwt, { Secret } from 'jsonwebtoken';
 import comparePasswords from '../utils/comparePasswords';
 import { Request, Response } from 'express';
 import { IUser } from '../interfaces';
+import mongoose from 'mongoose';
 
 export const register = async (req: Request, res: Response) => {
   console.log('Registering new user...');
@@ -22,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
     await newUser.save();
     console.log('New user created!');
 
-    const secret = process.env.JWT_TOKEN_SECRET as Secret;
+    const secret = process.env.ACCESS_TOKEN_SECRET as Secret;
     const token = jwt.sign({ id: newUser._id }, secret, {
       expiresIn: '30d',
     });
@@ -45,6 +46,9 @@ export const login = async (req: Request, res: Response) => {
       res.status(404).json({ message: 'User not found' });
       return;
     }
+
+    const userId: string = (user._id as mongoose.Types.ObjectId).toString();
+    console.log(userId)
     let isMatch = null;
     isMatch = comparePasswords(password, user.password);
 
@@ -53,7 +57,7 @@ export const login = async (req: Request, res: Response) => {
     }
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_TOKEN_SECRET as Secret,
+      process.env.ACCESS_TOKEN_SECRET as Secret,
       { expiresIn: '30d' }
     );
 
@@ -67,8 +71,7 @@ export const login = async (req: Request, res: Response) => {
       createdAt: user.createdAt,
       nickname: user.nickname,
     };
-    console.log(user._id);
-    req.session.id = userToSend.id as string;
+
     res.status(200).json({ userToSend, token });
   } catch (e) {
     console.log(e);
