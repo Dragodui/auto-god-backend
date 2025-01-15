@@ -11,6 +11,7 @@ export interface IUser extends Document {
   car?: string;
   password: string;
   role: string;
+  refreshToken?: string;
   createdAt: Date;
 }
 

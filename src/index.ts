@@ -7,9 +7,9 @@ import './database/index';
 import postRouter from './routes/posts';
 import cors from 'cors';
 
-config();
+  config();
 
-const app: Express = express();
+  const app: Express = express();
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
@@ -34,6 +34,6 @@ app.use(cors({
 app.use('/api/auth', authRouter);
 app.use('/api/posts', postRouter);
 
-app.listen(process.env.PORT, () => {
-  console.log('Server is running on port ' + process.env.PORT);
-});
+  app.listen(process.env.PORT, () => {
+    console.log('Server is running on port ' + process.env.PORT);
+  });
