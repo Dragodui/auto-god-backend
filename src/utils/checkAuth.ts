@@ -3,7 +3,7 @@ import jwt, { Secret } from 'jsonwebtoken';
 
 
 const checkAuth = (req: Request, res: Response, next: NextFunction): void => {
-  const token = req.cookies.accessToken;
+  const token = req.headers['authorization'];
 
   if (!token) {
     res.status(403).json({ message: 'Unauthorized' });

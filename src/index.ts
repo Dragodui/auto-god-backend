@@ -1,15 +1,20 @@
-import express, { Express, Response, Request } from 'express';
+import express, { Express } from 'express';
 import { config } from 'dotenv';
-import authRouter from './routes/auth';
-import MongoStore = require('connect-mongo');
+import MongoStore from 'connect-mongo';
 import session from 'express-session';
-import './database/index';
-import postRouter from './routes/posts';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import './database/index';
 
-  config();
+//routes
+import authRouter from './routes/auth';
+import postRouter from './routes/posts';
+import tagRouter from "./routes/tags";
+import topicRoutes from "./routes/topics";
 
-  const app: Express = express();
+config();
+
+const app: Express = express();
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
@@ -25,15 +30,20 @@ app.use(
     cookie: { secure: false },
   })
 );
-app.use(cors({
-  origin: 'http://localhost:5173', 
-  credentials: true,
-}
-));
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_HOST || 'http://localhost:5173',
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
 app.use('/api/posts', postRouter);
+app.use('/api/tags', tagRouter);
+app.use('/api/topics', topicRoutes);
 
-  app.listen(process.env.PORT, () => {
-    console.log('Server is running on port ' + process.env.PORT);
-  });
+app.listen(process.env.PORT, () => {
+  console.log('Server is running on port ' + process.env.PORT);
+});

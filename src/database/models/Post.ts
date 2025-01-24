@@ -1,6 +1,6 @@
 import { IPost } from './../../interfaces';
 
-import mongoose, { Model } from 'mongoose';
+import mongoose from 'mongoose';
 
 const PostModel: mongoose.Schema<IPost> = new mongoose.Schema({
   title: {
@@ -23,6 +23,16 @@ const PostModel: mongoose.Schema<IPost> = new mongoose.Schema({
   views: {
     type: Number,
     default: 0,
+  },
+  tags: {
+    type: [mongoose.Schema.Types.ObjectId],
+    required: true,
+    ref: 'tags',
+  },
+  topicId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'topics',
   },
 });
 
