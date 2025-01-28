@@ -1,6 +1,7 @@
 import { NextFunction, Response, Request } from 'express';
 import { verifyToken } from './generateToken';
 
+
 declare module 'express-serve-static-core' {
   interface Request {
     userId?: string;
@@ -18,11 +19,11 @@ export const authenticateToken = (
     return;
   }
 
-  const decoded = verifyToken(token) as { userId: string };
+  const decoded = verifyToken(token);
   try {
-    req.userId = decoded.userId;
+    req.userId = typeof decoded === "string" ? decoded : decoded.id;
+    console.log(req.userId)
     next();
-    return;
   } catch (error) {
     res.status(403).json({ error: 'Forbidden' });
     return;

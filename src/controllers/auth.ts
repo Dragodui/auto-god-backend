@@ -32,9 +32,12 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
+    console.log('Logging in...');
     const { login, password } = req.body;
+    console.log(req.body)
     if (!login || !password) {
       res.status(400).json({ message: 'Please provide email and password' });
+      return;
     }
     const user: IUser | null = await User.findOne({
       $or: [{ email: login }, { nickname: login }],
@@ -48,6 +51,7 @@ export const login = async (req: Request, res: Response) => {
 
     if (!isMatch) {
       res.status(404).json({ message: 'Invalid email/nickname or password' });
+      return;
     }
     const token = generateToken(user._id as unknown as string);
 
@@ -56,6 +60,7 @@ export const login = async (req: Request, res: Response) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
     res.status(200).json({ message: 'Logged in successfully' });
+    console.log('Logged in successfully');
   } catch (e) {
     console.log(e);
     res.status(500).json({ message: 'Server error' });
@@ -71,3 +76,14 @@ export const logout = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const getMyInfo = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const me = await User.findById(userId).select('-password');
+    res.status(200).json(me);
+  } catch (error) {
+    console.error('Error during getting user info:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
