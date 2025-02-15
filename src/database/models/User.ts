@@ -21,6 +21,9 @@ const UserModel: mongoose.Schema<IUser> = new mongoose.Schema(
       unique: true,
       default: '',
     },
+    avatar: {
+      type: String,
+    },
     car: {
       type: String,
       default: '',

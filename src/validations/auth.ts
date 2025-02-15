@@ -6,6 +6,22 @@ export const registerValidation = [
 ];
 
 export const loginValidation = [
-  body('email').isEmail(),
-  body('password').isLength({ min: 6 }),
+  body('login')
+    .custom((value) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(value)) return true;
+
+      const nicknameRegex = /^[a-zA-Z0-9_]{3,}$/;
+      if (nicknameRegex.test(value)) return true;
+
+      throw new Error(
+        'Login must be a valid email or a nickname (at least 3 characters, letters/numbers/_)'
+      );
+    })
+    .notEmpty()
+    .withMessage('Login is required'),
+
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
 ];

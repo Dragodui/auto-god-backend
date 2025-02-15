@@ -1,12 +1,22 @@
 import mongoose from 'mongoose';
 import { Document } from 'mongoose';
 
+declare module 'express-serve-static-core' {
+  interface Request {
+    userId?: string;
+    file?: {
+      path: string;
+    };
+  }
+}
+
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
   nickname?: string;
   name: string;
   lastName: string;
+  avatar?: string;
   rank: string;
   car?: string;
   password: string;
@@ -41,4 +51,14 @@ export interface ITag extends Document {
 
 export interface ITopic extends Document {
   title: string;
+}
+
+export interface INews extends IPost {}
+
+export interface ICar extends Document {
+  ownerId: mongoose.Types.ObjectId;
+  make: string;
+  carModel: string;
+  year: number;
+  description: string;
 }

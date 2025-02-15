@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 mongoose
   .connect('mongodb://127.0.0.1:27017/auto-god')
-  .then(() => console.log('Connected to the database'))
+  .then(() => logger.info('Connected to the database'))
   .catch((error) =>
-    console.log(`Error while connecting to the database ${error}`)
+    logger.info(`Error while connecting to the database ${error}`)
   );

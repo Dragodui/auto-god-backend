@@ -1,13 +1,8 @@
 import { NextFunction, Response, Request } from 'express';
 import { verifyToken } from './generateToken';
+import redisClient from '../database/redis';
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    userId?: string;
-  }
-}
-
-export const authenticateToken = (
+export const authenticateToken = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -20,8 +15,15 @@ export const authenticateToken = (
 
   const decoded = verifyToken(token);
   try {
-    req.userId = typeof decoded === 'string' ? decoded : decoded.id;
-    console.log(req.userId);
+    const userId = typeof decoded === 'string' ? decoded : decoded.id;
+    const sessionUserId = await redisClient.get(`token:${token}`);
+    if (!sessionUserId) {
+      res
+        .status(401)
+        .json({ error: 'Unauthorized: Invalid or expired session' });
+      return;
+    }
+    req.userId = userId;
     next();
   } catch (error) {
     res.status(403).json({ error: 'Forbidden' });

@@ -1,6 +1,13 @@
 import { Router } from 'express';
-import { createPost, deletePost, getPost, getPosts, getPostsForTopic, likePost } from '../controllers/posts';
-import { authenticateToken } from '../utils/authentificateToken';
+import {
+  createPost,
+  deletePost,
+  getPost,
+  getPosts,
+  getPostsForTopic,
+  likePost,
+} from '../controllers/posts';
+import { authenticateToken } from '../utils/authenticateToken';
 
 const router = Router();
 

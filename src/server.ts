@@ -9,8 +9,16 @@ import './database/index';
 //routes
 import authRouter from './routes/auth';
 import postRouter from './routes/posts';
-import tagRouter from "./routes/tags";
-import topicRoutes from "./routes/topics";
+import tagRouter from './routes/tags';
+import topicRoutes from './routes/topics';
+import newsRoutes from './routes/news';
+import commentRoutes from './routes/comments';
+import carRoutes from './routes/car';
+import userRoutes from './routes/user';
+
+// redis
+import redisClient from './database/redis';
+import logger from './utils/logger';
 
 config();
 
@@ -43,7 +51,11 @@ app.use('/api/auth', authRouter);
 app.use('/api/posts', postRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api/topics', topicRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/car', carRoutes);
+app.use('/api/user', userRoutes);
 
 app.listen(process.env.PORT, () => {
-  console.log('Server is running on port ' + process.env.PORT);
+  logger.info('Server is running on port ' + process.env.PORT);
 });
