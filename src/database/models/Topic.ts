@@ -7,6 +7,10 @@ const TopicModel: mongoose.Schema<ITopic> = new mongoose.Schema({
     type: String,
     required: true,
   },
+  cover: {
+    type: String,
+    required: true,
+  },
 });
 
 export default mongoose.model('topics', TopicModel);

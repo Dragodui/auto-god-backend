@@ -51,6 +51,7 @@ export interface ITag extends Document {
 
 export interface ITopic extends Document {
   title: string;
+  cover: string;
 }
 
 export interface INews extends IPost {}

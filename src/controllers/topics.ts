@@ -45,3 +45,19 @@ export const getTopic = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const createTopic = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { title, cover } = req.body;
+    const newTopic: ITopic = new Topic({ title, cover });
+    await newTopic.save();
+    logger.info(`Topic ${newTopic._id} created`);
+    res.status(201).json(newTopic);
+  } catch (error) {
+    logger.error('Error creating topic:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

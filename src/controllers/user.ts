@@ -30,8 +30,8 @@ export const updateUserAvatar = async (
     }
 
     const avatarPath: string = req.file.path;
-    let fileName = avatarPath.split("\\uploads\\").pop();
-    fileName = "/uploads/" + fileName;
+    let fileName = avatarPath.split('\\uploads\\').pop();
+    fileName = '/uploads/' + fileName;
 
     await redisClient.del(`userInfo:${userId}`);
     logger.info(`User ${userId} cache deleted`);
@@ -86,7 +86,7 @@ export const updateUserData = async (req: Request, res: Response) => {
 export const getUserLastActivity = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    
+
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
       return;
