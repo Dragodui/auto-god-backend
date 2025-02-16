@@ -26,8 +26,8 @@ Create a `.env` file in the root directory and add the following parameters:
 
 ```env
 PORT=8000
-SESSION_SECRET='amogus228'
-JWT_TOKEN_SECRET='amogus228'
+SESSION_SECRET='your SESSION_SECRET'
+JWT_TOKEN_SECRET='your JWT_TOKEN_SECRET'
 REDIS_URL='redis://localhost:6379'
 CLIENT_HOST='http://localhost:5173'
 NODE_ENV='development'
