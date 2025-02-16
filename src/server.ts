@@ -4,6 +4,7 @@ import MongoStore from 'connect-mongo';
 import session from 'express-session';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import './database/index';
 
 //routes
@@ -15,14 +16,16 @@ import newsRoutes from './routes/news';
 import commentRoutes from './routes/comments';
 import carRoutes from './routes/car';
 import userRoutes from './routes/user';
-
+import statsRoutes from './routes/stats';
 // redis
 import redisClient from './database/redis';
+//logger
 import logger from './utils/logger';
 
 config();
 
 const app: Express = express();
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
@@ -55,6 +58,7 @@ app.use('/api/news', newsRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/car', carRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.listen(process.env.PORT, () => {
   logger.info('Server is running on port ' + process.env.PORT);

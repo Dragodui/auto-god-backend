@@ -1,9 +1,8 @@
-import express, { Request, Response, Router } from 'express';
+import express, { Router } from 'express';
 import { loginValidation, registerValidation } from '../validations/auth';
 import { login, register, logout, getMyInfo } from '../controllers/auth';
 import { handleErrors } from '../utils/handleErrors';
 import { authenticateToken } from '../utils/authenticateToken';
-import upload from '../utils/multerConfig';
 
 const router: Router = express.Router();
 
