@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../utils/authenticateToken';
-import { getAllTags, getPostTags } from '../controllers/tags';
+import { getAllTags, getPostTags } from '../controllers/tagsController';
 
 const router = Router();
 

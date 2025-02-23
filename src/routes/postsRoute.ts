@@ -6,7 +6,7 @@ import {
   getPosts,
   getPostsForTopic,
   likePost,
-} from '../controllers/posts';
+} from '../controllers/postsController';
 import { authenticateToken } from '../utils/authenticateToken';
 
 const router = Router();

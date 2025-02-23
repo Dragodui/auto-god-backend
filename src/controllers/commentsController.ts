@@ -3,7 +3,7 @@ import Comment from '../database/models/Comment';
 import Post from '../database/models/Post';
 import redisClient from '../database/redis';
 import logger from '../utils/logger';
-import { IComment, INews, IPost } from '../interfaces';
+import { IComment, INews, IPost } from '../types';
 import New from '../database/models/News';
 
 export const createComment = async (

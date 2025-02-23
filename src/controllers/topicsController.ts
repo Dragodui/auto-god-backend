@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import Topic from '../database/models/Topic';
 import redisClient from '../database/redis';
 import logger from '../utils/logger';
-import { ITopic } from '../interfaces';
+import { ITopic } from '../types';
 
 export const getAllTopics = async (
   req: Request,

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import logger from '../utils/logger';
 import Car from '../database/models/Car';
-import { ICar } from '../interfaces';
+import { ICar } from '../types';
 
 export const addCar = async (req: Request, res: Response) => {
   try {

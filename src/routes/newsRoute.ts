@@ -6,7 +6,7 @@ import {
   getNews,
   getNewsForTopic,
   likeNews,
-} from '../controllers/news';
+} from '../controllers/newsController';
 import { authenticateToken } from '../utils/authenticateToken';
 
 const router = Router();

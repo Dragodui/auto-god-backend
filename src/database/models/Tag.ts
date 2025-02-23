@@ -1,4 +1,4 @@
-import { ITag } from './../../interfaces';
+import { ITag } from '../../types';
 
 import mongoose from 'mongoose';
 

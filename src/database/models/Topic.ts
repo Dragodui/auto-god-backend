@@ -1,4 +1,4 @@
-import { ITopic } from './../../interfaces';
+import { ITopic } from '../../types';
 
 import mongoose from 'mongoose';
 

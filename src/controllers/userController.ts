@@ -1,7 +1,6 @@
-// src/controllers/userController.ts
 import { Request, Response } from 'express';
 import User from '../database/models/User';
-import { IComment, IPost, IUser } from '../interfaces';
+import { IComment, IPost, IUser } from '../types';
 import Comment from '../database/models/Comment';
 import logger from '../utils/logger';
 import Post from '../database/models/Post';

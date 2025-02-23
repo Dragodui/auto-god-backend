@@ -8,15 +8,15 @@ import path from 'path';
 import './database/index';
 
 //routes
-import authRouter from './routes/auth';
-import postRouter from './routes/posts';
-import tagRouter from './routes/tags';
-import topicRoutes from './routes/topics';
-import newsRoutes from './routes/news';
-import commentRoutes from './routes/comments';
-import carRoutes from './routes/car';
-import userRoutes from './routes/user';
-import statsRoutes from './routes/stats';
+import authRouter from './routes/authRoute';
+import postRouter from './routes/postsRoute';
+import tagRouter from './routes/tagsRoute';
+import topicRoutes from './routes/topicsRoute';
+import newsRoutes from './routes/newsRoute';
+import commentRoutes from './routes/commentsRoute';
+import carRoutes from './routes/carRoute';
+import userRoutes from './routes/userRoute';
+import statsRoutes from './routes/statsRoute';
 // redis
 import redisClient from './database/redis';
 //logger

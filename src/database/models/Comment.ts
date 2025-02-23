@@ -1,4 +1,4 @@
-import { IComment } from './../../interfaces';
+import { IComment } from '../../types';
 
 import mongoose from 'mongoose';
 

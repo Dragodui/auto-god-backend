@@ -4,7 +4,7 @@ import {
   getUserLastActivity,
   updateUserAvatar,
   updateUserData,
-} from '../controllers/user';
+} from '../controllers/userController';
 import { authenticateToken } from '../utils/authenticateToken';
 
 const router = Router();

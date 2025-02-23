@@ -1,4 +1,4 @@
-import { IPost } from './../../interfaces';
+import { IPost } from '../../types';
 
 import mongoose from 'mongoose';
 

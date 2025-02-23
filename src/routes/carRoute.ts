@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
 import { authenticateToken } from '../utils/authenticateToken';
-import { addCar, changeCar } from '../controllers/car';
+import { addCar, changeCar } from '../controllers/carController';
 
 const router: Router = express.Router();
 

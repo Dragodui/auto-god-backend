@@ -1,6 +1,14 @@
 import express, { Router } from 'express';
-import { loginValidation, registerValidation } from '../validations/auth';
-import { login, register, logout, getMyInfo } from '../controllers/auth';
+import {
+  loginValidation,
+  registerValidation,
+} from '../validations/authValidation';
+import {
+  login,
+  register,
+  logout,
+  getMyInfo,
+} from '../controllers/authController';
 import { handleErrors } from '../utils/handleErrors';
 import { authenticateToken } from '../utils/authenticateToken';
 

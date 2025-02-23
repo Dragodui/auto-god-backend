@@ -3,7 +3,7 @@ import Post from '../database/models/Post';
 import Topic from '../database/models/Topic';
 import Tag from '../database/models/Tag';
 import redisClient from '../database/redis';
-import { IPost, ITag } from '../interfaces';
+import { IPost, ITag } from '../types';
 import logger from '../utils/logger';
 
 export const createPost = async (

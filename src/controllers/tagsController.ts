@@ -3,7 +3,7 @@ import Tag from '../database/models/Tag';
 import Post from '../database/models/Post';
 import redisClient from '../database/redis';
 import logger from '../utils/logger';
-import { ITag } from '../interfaces';
+import { ITag } from '../types';
 
 export const getAllTags = async (
   req: Request,

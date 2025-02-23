@@ -4,7 +4,7 @@ import {
   createComment,
   getComments,
   likeComment,
-} from '../controllers/comments';
+} from '../controllers/commentsController';
 
 const router = Router();
 

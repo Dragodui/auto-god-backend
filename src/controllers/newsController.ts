@@ -3,7 +3,7 @@ import News from '../database/models/News';
 import Topic from '../database/models/Topic';
 import Tag from '../database/models/Tag';
 import redisClient from '../database/redis';
-import { INews, ITag } from '../interfaces';
+import { INews, ITag } from '../types';
 import logger from '../utils/logger';
 
 export const createNews = async (

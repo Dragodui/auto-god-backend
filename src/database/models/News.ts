@@ -1,4 +1,4 @@
-import { INews } from '../../interfaces';
+import { INews } from '../../types';
 
 import mongoose from 'mongoose';
 

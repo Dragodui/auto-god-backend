@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import User from '../database/models/User';
 import { hashPassword } from '../utils/hashPassword';
 import comparePasswords from '../utils/comparePasswords';
-import { IUser } from '../interfaces';
+import { IUser } from '../types';
 import { generateToken } from '../utils/generateToken';
 import redisClient from '../database/redis';
 import logger from '../utils/logger';
