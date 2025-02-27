@@ -32,6 +32,7 @@ export interface IPost extends Document {
   likes: number;
   views: number;
   topicId: mongoose.Types.ObjectId;
+  image: string;
   tags: mongoose.Types.ObjectId[];
 }
 
@@ -53,7 +54,9 @@ export interface ITopic extends Document {
   cover: string;
 }
 
-export interface INews extends IPost {}
+export interface INews extends IPost {
+  isMarkDown: boolean;
+}
 
 export interface ICar extends Document {
   ownerId: mongoose.Types.ObjectId;

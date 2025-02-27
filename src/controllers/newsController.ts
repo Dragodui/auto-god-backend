@@ -3,39 +3,68 @@ import News from '../database/models/News';
 import Topic from '../database/models/Topic';
 import Tag from '../database/models/Tag';
 import redisClient from '../database/redis';
-import { INews, ITag } from '../types';
+import { INews, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
+import path from 'path';
+import fs from 'fs';
 
-export const createNews = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createNews = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, content, tags, topicId } = req.body;
+    const { title, content, tags, topicId, isMarkDown } = req.body;
+    
     if (!title || !content || !tags || !topicId) {
-      logger.warn('Missing fields in createNews request');
       res.status(400).json({ message: 'Please provide all fields' });
       return;
     }
-    const userId = req.userId;
-    logger.info(`User ${userId} is creating a news in topic ${topicId}`);
-    const newNews: INews = await News.create({
+    
+    const newNews = await News.create({
       title,
       content,
       tags,
       topicId,
-      authorId: userId,
+      authorId: req.userId,
+      isMarkDown
     });
+
     await newNews.save();
-    await redisClient.del('allNews');
-    await redisClient.del(`topicNews:${topicId}`);
-    logger.info(`News ${newNews._id} created by user ${userId}`);
-    res.status(201).json({ message: 'News created' });
+    res.status(201).json({ message: 'News created successfully', news: newNews });
   } catch (error) {
-    logger.error('Error in createNews:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const uploadNewsImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+    const newsId = req.params.id;
+    if (!newsId) {
+      res.status(401).json({ message: 'No news id provided' });
+      return;
+    }
+    const imagePath = req.file.path;
+    let fileName = imagePath.split('\\uploads\\').pop();
+    fileName = '/uploads/' + fileName;
+    const news: INews | null = await News.findByIdAndUpdate(
+        newsId,
+      { image: fileName },
+      { new: true }
+    );
+    if (!news) {
+      res.status(404).json({ message: 'News not found' });
+      return;
+    }
+
+    logger.info(`new ${newsId} updated image`);
+
+    res.status(200).json({ message: 'Image uploaded', imagePath });
+  } catch (error) {
+    logger.error('Error in uploadNewsImage:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
 
 export const getNews = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -61,19 +90,26 @@ export const getNewsForTopic = async (
   res: Response
 ): Promise<void> => {
   try {
-    const topicId = req.params.topicId;
-    logger.info(`Fetching news for topic ${topicId}`);
-    const redisNews = await redisClient.get(`topicNews:${topicId}`);
+    const topicName = req.params.topicName;
+    logger.info(`Fetching news for topic ${topicName}`);
+    const redisNews = await redisClient.get(`topicNews:${topicName}`);
     if (redisNews) {
-      logger.info(`News for topic ${topicId} fetched from cache`);
+      logger.info(`News for topic ${topicName} fetched from cache`);
       res.status(200).json(JSON.parse(redisNews));
       return;
     }
-    const news: INews[] | null = await News.find({ topicId });
-    await redisClient.set(`topicNews:${topicId}`, JSON.stringify(news), {
+    const topic: ITopic | null = await Topic.findOne({ title: topicName });
+    if (!topic) {
+      logger.warn(`Topic ${topicName} not found`);
+      res.status(404).json({ message: 'Topic not found' });
+      return
+    }
+    const news: INews[] | null = await News.find({ topicId: topic._id });
+    console.log(news);
+    await redisClient.set(`topicNews:${topicName}`, JSON.stringify(news), {
       EX: 900,
     });
-    logger.info(`News for topic ${topicId} fetched from DB and cached`);
+    logger.info(`News for topic ${topicName} fetched from DB and cached`);
     res.status(200).json(news);
   } catch (error) {
     logger.error('Error in getNewsForTopic:', error);

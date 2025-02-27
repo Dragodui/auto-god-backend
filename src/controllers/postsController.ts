@@ -3,7 +3,7 @@ import Post from '../database/models/Post';
 import Topic from '../database/models/Topic';
 import Tag from '../database/models/Tag';
 import redisClient from '../database/redis';
-import { IPost, ITag } from '../types';
+import { IPost, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
 
 export const createPost = async (
@@ -11,7 +11,7 @@ export const createPost = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { title, content, tags, topicId } = req.body;
+    const { title, content, tags, topicId, image } = req.body;
     if (!title || !content || !tags || !topicId) {
       logger.warn('Missing fields in createPost request');
       res.status(400).json({ message: 'Please provide all fields' });
@@ -25,6 +25,7 @@ export const createPost = async (
       tags,
       topicId,
       authorId: userId,
+      image
     });
     await newPost.save();
     await redisClient.del('allPosts');
@@ -61,19 +62,26 @@ export const getPostsForTopic = async (
   res: Response
 ): Promise<void> => {
   try {
-    const topicId = req.params.topicId;
-    logger.info(`Fetching posts for topic ${topicId}`);
-    const redisPosts = await redisClient.get(`topicPosts:${topicId}`);
+    const topicName = req.params.topicName;
+    logger.info(`Fetching posts for topic ${topicName}`);
+    const redisPosts = await redisClient.get(`topicPosts:${topicName}`);
     if (redisPosts) {
-      logger.info(`Posts for topic ${topicId} fetched from cache`);
+      logger.info(`Posts for topic ${topicName} fetched from cache`);
       res.status(200).json(JSON.parse(redisPosts));
       return;
     }
-    const posts: IPost[] | null = await Post.find({ topicId });
-    await redisClient.set(`topicPosts:${topicId}`, JSON.stringify(posts), {
+    const topic: ITopic | null = await Topic.findOne({ title:
+    topicName });
+    if (!topic) {
+      logger.warn(`Topic ${topicName} not found`);
+      res.status(404).json({ message: 'Topic not found' });
+      return;
+    }
+    const posts: IPost[] | null = await Post.find({ topicId: topic._id });
+    await redisClient.set(`topicPosts:${topicName}`, JSON.stringify(posts), {
       EX: 900,
     });
-    logger.info(`Posts for topic ${topicId} fetched from DB and cached`);
+    logger.info(`Posts for topic ${topicName} fetched from DB and cached`);
     res.status(200).json(posts);
   } catch (error) {
     logger.error('Error in getPostsForTopic:', error);

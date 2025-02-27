@@ -4,7 +4,6 @@ import { IComment, IPost, IUser } from '../types';
 import Comment from '../database/models/Comment';
 import logger from '../utils/logger';
 import Post from '../database/models/Post';
-import { IpcNetConnectOpts } from 'net';
 import redisClient from '../database/redis';
 
 interface IActivity {

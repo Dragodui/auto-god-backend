@@ -24,10 +24,18 @@ const NewsModel: mongoose.Schema<INews> = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  image: {
+    type: String,
+  },
   tags: {
     type: [mongoose.Schema.Types.ObjectId],
     required: true,
     ref: 'tags',
+  },
+  isMarkDown: {
+    type: Boolean,
+    required: true,
+    default: false,
   },
   topicId: {
     type: mongoose.Schema.Types.ObjectId,
