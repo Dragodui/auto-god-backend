@@ -32,6 +32,11 @@ const PostModel: mongoose.Schema<IPost> = new mongoose.Schema({
     required: true,
     ref: 'tags',
   },
+  authorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'users',
+  },
   topicId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,

@@ -7,6 +7,7 @@ import {
   getNewsForTopic,
   likeNews,
   uploadNewsImage,
+  viewNews,
 } from '../controllers/newsController';
 import { authenticateToken } from '../utils/authenticateToken';
 import upload from '../utils/multerConfig';
@@ -21,9 +22,10 @@ router.post(
   upload.single('image'),
   uploadNewsImage
 );
-router.get('/:topicName', getNewsForTopic);
+router.get('/topic/:topicName', getNewsForTopic);
 router.get('/:id', getOneNews);
 router.delete('/:id', authenticateToken, deleteNews);
 router.put('/like/:id', authenticateToken, likeNews);
+router.put('/views/:id', authenticateToken, viewNews);
 
 export default router;

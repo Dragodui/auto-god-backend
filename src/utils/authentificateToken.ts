@@ -21,7 +21,7 @@ export const authenticateToken = (
   const decoded = verifyToken(token);
   try {
     req.userId = typeof decoded === 'string' ? decoded : decoded.id;
-    console.log(req.userId);
+  
     next();
   } catch (error) {
     res.status(403).json({ error: 'Forbidden' });

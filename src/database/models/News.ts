@@ -37,6 +37,11 @@ const NewsModel: mongoose.Schema<INews> = new mongoose.Schema({
     required: true,
     default: false,
   },
+  authorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'users',
+  },
   topicId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,

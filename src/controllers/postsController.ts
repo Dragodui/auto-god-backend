@@ -5,13 +5,14 @@ import Tag from '../database/models/Tag';
 import redisClient from '../database/redis';
 import { IPost, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
+import User from '../database/models/User';
 
 export const createPost = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const { title, content, tags, topicId, image } = req.body;
+    const { title, content, tags, topicId } = req.body;
     if (!title || !content || !tags || !topicId) {
       logger.warn('Missing fields in createPost request');
       res.status(400).json({ message: 'Please provide all fields' });
@@ -24,14 +25,15 @@ export const createPost = async (
       content,
       tags,
       topicId,
+      likes: 0,
+      views: 0,
       authorId: userId,
-      image
     });
     await newPost.save();
     await redisClient.del('allPosts');
     await redisClient.del(`topicPosts:${topicId}`);
     logger.info(`Post ${newPost._id} created by user ${userId}`);
-    res.status(201).json({ message: 'Post created' });
+    res.status(201).json({ message: 'Post created', post: newPost });
   } catch (error) {
     logger.error('Error in createPost:', error);
     res.status(500).json({ message: 'Server error' });
@@ -57,6 +59,39 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const uploadPostImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+    const postId = req.params.id;
+    if (!postId) {
+      res.status(401).json({ message: 'No post id provided' });
+      return;
+    }
+    const imagePath = req.file.path;
+    let fileName = imagePath.split('\\uploads\\').pop();
+    fileName = '/uploads/' + fileName;
+    const post: IPost | null = await Post.findByIdAndUpdate(
+        postId,
+      { image: fileName },
+      { new: true }
+    );
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+
+    logger.info(`new ${postId} updated image`);
+
+    res.status(200).json({ message: 'Image uploaded', imagePath });
+  } catch (error) {
+    logger.error('Error in uploadNewsImage:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
 export const getPostsForTopic = async (
   req: Request,
   res: Response
@@ -64,14 +99,15 @@ export const getPostsForTopic = async (
   try {
     const topicName = req.params.topicName;
     logger.info(`Fetching posts for topic ${topicName}`);
-    const redisPosts = await redisClient.get(`topicPosts:${topicName}`);
-    if (redisPosts) {
-      logger.info(`Posts for topic ${topicName} fetched from cache`);
-      res.status(200).json(JSON.parse(redisPosts));
-      return;
-    }
+    // const redisPosts = await redisClient.get(`topicPosts:${topicName}`);
+    // if (redisPosts) {
+    //   logger.info(`Posts for topic ${topicName} fetched from cache`);
+    //   res.status(200).json(JSON.parse(redisPosts));
+    //   return;
+    // }
     const topic: ITopic | null = await Topic.findOne({ title:
     topicName });
+    console.log(topic)
     if (!topic) {
       logger.warn(`Topic ${topicName} not found`);
       res.status(404).json({ message: 'Topic not found' });
@@ -107,12 +143,17 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
     }
     const topic = await Topic.findById(post.topicId);
     const tags = await Tag.find({ _id: { $in: post.tags } });
+        const author = await User.findById(post.authorId).select('-password');
     const postObject = {
       id: post._id,
       title: post.title,
       content: post.content,
       likes: post.likes,
+      views: post.views,
+      image: post.image,
       topic: topic?.title,
+      createdAt: post.createdAt,
+      author:author,
       tags: tags.map((tag: ITag) => tag.title),
     };
     await redisClient.set(`post:${postId}`, JSON.stringify(postObject), {

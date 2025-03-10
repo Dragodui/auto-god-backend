@@ -5,6 +5,7 @@ import redisClient from '../database/redis';
 import logger from '../utils/logger';
 import { IComment, INews, IPost } from '../types';
 import New from '../database/models/News';
+import User from '../database/models/User';
 
 export const createComment = async (
   req: Request,
@@ -66,6 +67,10 @@ export const getComments = async (
       logger.warn(`No comments found for post ${postId}`);
       res.status(404).json({ message: 'No comments found' });
       return;
+    }
+    for (let comment of comments) {
+      const author = await User.findById(comment.authorId);
+      if (author) comment.author = author;
     }
 
     await redisClient.set(`postComments:${postId}`, JSON.stringify(comments), {

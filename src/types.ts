@@ -37,6 +37,7 @@ export interface IPost extends Document {
 }
 
 export interface IComment extends Document {
+  author?: IUser;
   authorId: mongoose.Types.ObjectId;
   postId: mongoose.Types.ObjectId;
   content: string;

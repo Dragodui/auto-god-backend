@@ -7,6 +7,7 @@ import { INews, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
 import path from 'path';
 import fs from 'fs';
+import User from '../database/models/User';
 
 export const createNews = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -105,7 +106,7 @@ export const getNewsForTopic = async (
       return
     }
     const news: INews[] | null = await News.find({ topicId: topic._id });
-    console.log(news);
+    
     await redisClient.set(`topicNews:${topicName}`, JSON.stringify(news), {
       EX: 900,
     });
@@ -138,13 +139,19 @@ export const getOneNews = async (
     }
     const topic = await Topic.findById(news.topicId);
     const tags = await Tag.find({ _id: { $in: news.tags } });
+    const author = await User.findById(news.authorId).select('-password');
     const newsObject = {
       id: news._id,
       title: news.title,
       content: news.content,
       likes: news.likes,
       topic: topic?.title,
+      views: news.views,
+      author: author,
+      isMarkDown: news.isMarkDown,
+      image: news.image,
       tags: tags.map((tag: ITag) => tag.title),
+      createdAt: news.createdAt,
     };
     await redisClient.set(`news:${newsId}`, JSON.stringify(newsObject), {
       EX: 900,
@@ -212,3 +219,34 @@ export const likeNews = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const viewNews = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const newsId = req.params.id;
+    logger.info(`Liking news ${newsId}`);
+    const news: INews | null = await News.findById(newsId);
+    if (!news) {
+      logger.warn(`News ${newsId} not found for liking`);
+      res.status(404).json({ message: 'News not found' });
+      return;
+    }
+    news.views += 1;
+    await news.save();
+    const redisNews = await redisClient.get(`news:${newsId}`);
+    if (redisNews) {
+      const parsedNews = JSON.parse(redisNews);
+      parsedNews.likes = news.likes;
+      await redisClient.set(`news:${newsId}`, JSON.stringify(parsedNews), {
+        EX: 900,
+      });
+      logger.info(`News ${newsId} cache updated with new like count`);
+    }
+    await redisClient.del('allNews');
+    await redisClient.del(`topicNews:${news.topicId}`);
+    logger.info(`News ${newsId} liked successfully`);
+    res.status(200).json({ message: 'News liked' });
+  } catch (error) {
+    logger.error('Error in likeNews:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
