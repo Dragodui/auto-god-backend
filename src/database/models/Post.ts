@@ -17,12 +17,14 @@ const PostModel: mongoose.Schema<IPost> = new mongoose.Schema({
     default: new Date(),
   },
   likes: {
-    type: Number,
-    default: 0,
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'users',
+    default: [],
   },
   views: {
-    type: Number,
-    default: 0,
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'users',
+    default: [],
   },
   image: {
     type: String,

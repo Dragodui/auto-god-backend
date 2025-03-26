@@ -6,6 +6,7 @@ import redisClient from '../database/redis';
 import { IPost, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
 import User from '../database/models/User';
+import { Types } from "mongoose";
 
 export const createPost = async (
   req: Request,
@@ -59,7 +60,10 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const uploadPostImage = async (req: Request, res: Response): Promise<void> => {
+export const uploadPostImage = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     if (!req.file) {
       res.status(400).json({ message: 'No file uploaded' });
@@ -74,7 +78,7 @@ export const uploadPostImage = async (req: Request, res: Response): Promise<void
     let fileName = imagePath.split('\\uploads\\').pop();
     fileName = '/uploads/' + fileName;
     const post: IPost | null = await Post.findByIdAndUpdate(
-        postId,
+      postId,
       { image: fileName },
       { new: true }
     );
@@ -90,7 +94,7 @@ export const uploadPostImage = async (req: Request, res: Response): Promise<void
     logger.error('Error in uploadNewsImage:', error);
     res.status(500).json({ message: 'Server error' });
   }
-}
+};
 
 export const getPostsForTopic = async (
   req: Request,
@@ -105,9 +109,7 @@ export const getPostsForTopic = async (
     //   res.status(200).json(JSON.parse(redisPosts));
     //   return;
     // }
-    const topic: ITopic | null = await Topic.findOne({ title:
-    topicName });
-    console.log(topic)
+    const topic: ITopic | null = await Topic.findOne({ title: topicName });
     if (!topic) {
       logger.warn(`Topic ${topicName} not found`);
       res.status(404).json({ message: 'Topic not found' });
@@ -143,7 +145,7 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
     }
     const topic = await Topic.findById(post.topicId);
     const tags = await Tag.find({ _id: { $in: post.tags } });
-        const author = await User.findById(post.authorId).select('-password');
+    const author = await User.findById(post.authorId).select('-password');
     const postObject = {
       id: post._id,
       title: post.title,
@@ -153,7 +155,7 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
       image: post.image,
       topic: topic?.title,
       createdAt: post.createdAt,
-      author:author,
+      author: author,
       tags: tags.map((tag: ITag) => tag.title),
     };
     await redisClient.set(`post:${postId}`, JSON.stringify(postObject), {
@@ -202,8 +204,23 @@ export const likePost = async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({ message: 'Post not found' });
       return;
     }
-    post.likes += 1;
-    await post.save();
+
+    const userId = req.userId;
+    if (!userId || userId === undefined) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+    if (post.likes.includes(userId as any)) {
+      logger.warn(`Post ${postId} already liked by user ${userId}`);
+      post.likes = post.likes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
+      await post.save();
+    } else {
+      post.likes.push(new Types.ObjectId(userId));
+      await post.save();
+    }
+
     const redisPost = await redisClient.get(`post:${postId}`);
     if (redisPost) {
       const parsedPost = JSON.parse(redisPost);
@@ -219,6 +236,46 @@ export const likePost = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ message: 'Post liked' });
   } catch (error) {
     logger.error('Error in likePost:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const viewPost = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const postId = req.params.id;
+    logger.info(`Viewing post ${postId}`);
+    const post: IPost | null = await Post.findById(postId);
+    if (!post) {
+      logger.warn(`Post ${postId} not found for viewing`);
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+
+    const userId = req.userId;
+    console.log(post);
+    if (post.views.includes(userId as any)) {
+      logger.warn(`POst ${postId} already viewed by user ${userId}`);
+      res.status(400).json({ message: 'News already viewed' });
+      return;
+    }
+    post.views.push(req.userId as any);
+    await post.save();
+
+    const redisPost = await redisClient.get(`post:${postId}`);
+    if (redisPost) {
+      const parsedPost = JSON.parse(redisPost);
+      parsedPost.likes = post.likes;
+      await redisClient.set(`post:${postId}`, JSON.stringify(parsedPost), {
+        EX: 900,
+      });
+      logger.info(`Post ${postId} cache updated with new view count`);
+    }
+    await redisClient.del('allPosts');
+    await redisClient.del(`topicPosts:${post.topicId}`);
+    logger.info(`News ${postId} liked successfully`);
+    res.status(200).json({ message: 'News liked' });
+  } catch (error) {
+    logger.error('Error in viewPost:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -125,9 +125,7 @@ export const getUserLastActivity = async (req: Request, res: Response) => {
 
 export const getUserById = async (req: Request, res: Response) => {
   try {
-    console.log(req.params)
     const userId = req.params.id;
-    console.log(userId)
     const user = await User.findById(userId);
     if (!user) {
       res.status(404).json({ message: 'User not found' });
@@ -138,4 +136,4 @@ export const getUserById = async (req: Request, res: Response) => {
     logger.error('Error getting user by id:', error);
     res.status(500).json({ message: 'Server error' });
   }
-}
+};

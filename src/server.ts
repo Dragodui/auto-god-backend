@@ -55,7 +55,7 @@ app.use('/api/posts', postRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api/topics', topicRoutes);
 app.use('/api/news', newsRoutes);
-app.use('/api/comments', commentRoutes);  
+app.use('/api/comments', commentRoutes);
 app.use('/api/car', carRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/stats', statsRoutes);

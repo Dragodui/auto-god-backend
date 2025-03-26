@@ -5,36 +5,43 @@ import Tag from '../database/models/Tag';
 import redisClient from '../database/redis';
 import { INews, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
-import path from 'path';
-import fs from 'fs';
 import User from '../database/models/User';
+import {Types} from 'mongoose';
 
-export const createNews = async (req: Request, res: Response): Promise<void> => {
+export const createNews = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { title, content, tags, topicId, isMarkDown } = req.body;
-    
+
     if (!title || !content || !tags || !topicId) {
       res.status(400).json({ message: 'Please provide all fields' });
       return;
     }
-    
+
     const newNews = await News.create({
       title,
       content,
       tags,
       topicId,
       authorId: req.userId,
-      isMarkDown
+      isMarkDown,
     });
 
     await newNews.save();
-    res.status(201).json({ message: 'News created successfully', news: newNews });
+    res
+      .status(201)
+      .json({ message: 'News created successfully', news: newNews });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-export const uploadNewsImage = async (req: Request, res: Response): Promise<void> => {
+export const uploadNewsImage = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     if (!req.file) {
       res.status(400).json({ message: 'No file uploaded' });
@@ -49,7 +56,7 @@ export const uploadNewsImage = async (req: Request, res: Response): Promise<void
     let fileName = imagePath.split('\\uploads\\').pop();
     fileName = '/uploads/' + fileName;
     const news: INews | null = await News.findByIdAndUpdate(
-        newsId,
+      newsId,
       { image: fileName },
       { new: true }
     );
@@ -65,7 +72,7 @@ export const uploadNewsImage = async (req: Request, res: Response): Promise<void
     logger.error('Error in uploadNewsImage:', error);
     res.status(500).json({ message: 'Server error' });
   }
-}
+};
 
 export const getNews = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -103,10 +110,10 @@ export const getNewsForTopic = async (
     if (!topic) {
       logger.warn(`Topic ${topicName} not found`);
       res.status(404).json({ message: 'Topic not found' });
-      return
+      return;
     }
     const news: INews[] | null = await News.find({ topicId: topic._id });
-    
+
     await redisClient.set(`topicNews:${topicName}`, JSON.stringify(news), {
       EX: 900,
     });
@@ -192,6 +199,7 @@ export const deleteNews = async (
 export const likeNews = async (req: Request, res: Response): Promise<void> => {
   try {
     const newsId = req.params.id;
+    console.log(newsId);
     logger.info(`Liking news ${newsId}`);
     const news: INews | null = await News.findById(newsId);
     if (!news) {
@@ -199,8 +207,20 @@ export const likeNews = async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({ message: 'News not found' });
       return;
     }
-    news.likes += 1;
-    await news.save();
+    const userId = req.userId;
+    if (!userId || userId === undefined) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+    if (news.likes.includes(userId as any)) {
+      logger.warn(`News ${newsId} already liked by user ${userId}`);
+      news.likes = news.likes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
+    } else {
+      news.likes.push(new Types.ObjectId(userId));
+      await news.save();
+    }
     const redisNews = await redisClient.get(`news:${newsId}`);
     if (redisNews) {
       const parsedNews = JSON.parse(redisNews);
@@ -223,15 +243,23 @@ export const likeNews = async (req: Request, res: Response): Promise<void> => {
 export const viewNews = async (req: Request, res: Response): Promise<void> => {
   try {
     const newsId = req.params.id;
-    logger.info(`Liking news ${newsId}`);
+    logger.info(`Viewing news ${newsId}`);
     const news: INews | null = await News.findById(newsId);
     if (!news) {
-      logger.warn(`News ${newsId} not found for liking`);
+      logger.warn(`News ${newsId} not found for view`);
       res.status(404).json({ message: 'News not found' });
       return;
     }
-    news.views += 1;
+
+    const userId = req.userId;
+    if (news.views.includes(userId as any)) {
+      logger.warn(`News ${newsId} already viewed by user ${userId}`);
+      res.status(400).json({ message: 'News already viewed' });
+      return;
+    }
+    news.views.push(req.userId as any);
     await news.save();
+
     const redisNews = await redisClient.get(`news:${newsId}`);
     if (redisNews) {
       const parsedNews = JSON.parse(redisNews);
@@ -239,14 +267,14 @@ export const viewNews = async (req: Request, res: Response): Promise<void> => {
       await redisClient.set(`news:${newsId}`, JSON.stringify(parsedNews), {
         EX: 900,
       });
-      logger.info(`News ${newsId} cache updated with new like count`);
+      logger.info(`News ${newsId} cache updated with new view count`);
     }
     await redisClient.del('allNews');
     await redisClient.del(`topicNews:${news.topicId}`);
-    logger.info(`News ${newsId} liked successfully`);
-    res.status(200).json({ message: 'News liked' });
+    logger.info(`News ${newsId} view successfully`);
+    res.status(200).json({ message: 'News viewed' });
   } catch (error) {
-    logger.error('Error in likeNews:', error);
+    logger.error('Error in viewNews:', error);
     res.status(500).json({ message: 'Server error' });
   }
-}
+};

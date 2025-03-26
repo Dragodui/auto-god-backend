@@ -18,6 +18,6 @@ router.post(
 );
 router.put('/data', authenticateToken, updateUserData);
 router.get('/activity', authenticateToken, getUserLastActivity);
-router.get('/:id', getUserById)
+router.get('/:id', getUserById);
 
 export default router;

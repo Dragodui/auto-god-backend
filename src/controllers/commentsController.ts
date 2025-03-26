@@ -6,6 +6,7 @@ import logger from '../utils/logger';
 import { IComment, INews, IPost } from '../types';
 import New from '../database/models/News';
 import User from '../database/models/User';
+import { Types } from 'mongoose';
 
 export const createComment = async (
   req: Request,
@@ -57,10 +58,17 @@ export const createComment = async (
 export const getComments = async (
   req: Request,
   res: Response
-): Promise<void> => {
+): Promise<void> => { 
   try {
     const postId = req.params.postId;
     logger.info(`Fetching comments for post ${postId}`);
+
+    const cachedComments = await redisClient.get(`postComments:${postId}`);
+    if (cachedComments) {
+      logger.info(`Comments for post ${postId} fetched from cache`);
+      res.status(200).json(JSON.parse(cachedComments));
+      return;
+    }
 
     const comments: IComment[] | null = await Comment.find({ postId });
     if (!comments) {
@@ -68,19 +76,22 @@ export const getComments = async (
       res.status(404).json({ message: 'No comments found' });
       return;
     }
-    for (let comment of comments) {
-      const author = await User.findById(comment.authorId);
+
+    let parsedComments: IComment[] = JSON.parse(JSON.stringify(comments));
+
+    for (let comment of parsedComments) {
+      const author = await User.findById(comment.authorId).select('-password');
       if (author) comment.author = author;
     }
 
-    await redisClient.set(`postComments:${postId}`, JSON.stringify(comments), {
+    await redisClient.set(`postComments:${postId}`, JSON.stringify(parsedComments), {
       EX: 300,
     });
 
     logger.info(
-      `Comments for post ${postId} cached (count: ${comments.length})`
+      `Comments for post ${postId} cached (count: ${parsedComments.length})`
     );
-    res.status(200).json(comments);
+    res.status(200).json(parsedComments);
   } catch (error) {
     logger.error('Error fetching comments:', error);
     res.status(500).json({ message: 'Server error' });
@@ -101,9 +112,21 @@ export const likeComment = async (
       res.status(404).json({ message: 'Comment not found' });
       return;
     }
-
-    comment.likes += 1;
-    await comment.save();
+    const userId = req.userId;
+    if (!userId || userId === undefined) {
+      logger.warn('Unauthorized access to like comment');
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+    if (comment.likes.includes(userId as any)) {
+      logger.warn(`Comment ${id} already liked by user ${userId}`);
+      comment.likes = comment.likes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
+    } else {
+      comment.likes.push(new Types.ObjectId(userId));
+      await comment.save();
+    }
 
     await redisClient.del(`postComments:${comment.postId}`);
 

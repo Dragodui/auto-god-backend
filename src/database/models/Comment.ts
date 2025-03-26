@@ -28,8 +28,9 @@ const CommentModel: mongoose.Schema<IComment> = new mongoose.Schema({
     default: new Date(),
   },
   likes: {
-    type: Number,
-    default: 0,
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'users',
+    default: [],
   },
 });
 

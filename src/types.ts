@@ -29,8 +29,8 @@ export interface IPost extends Document {
   title: string;
   content: string;
   createdAt: Date;
-  likes: number;
-  views: number;
+  likes: mongoose.Types.ObjectId[];
+  views: mongoose.Types.ObjectId[];
   topicId: mongoose.Types.ObjectId;
   image: string;
   tags: mongoose.Types.ObjectId[];
@@ -43,7 +43,7 @@ export interface IComment extends Document {
   content: string;
   replyTo?: mongoose.Types.ObjectId;
   createdAt: Date;
-  likes: number;
+  likes: mongoose.Types.ObjectId[];
 }
 
 export interface ITag extends Document {
