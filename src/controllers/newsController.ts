@@ -217,6 +217,7 @@ export const likeNews = async (req: Request, res: Response): Promise<void> => {
       news.likes = news.likes.filter(
         (id) => id.toString() !== userId.toString()
       );
+      await news.save();
     } else {
       news.likes.push(new Types.ObjectId(userId));
       await news.save();
