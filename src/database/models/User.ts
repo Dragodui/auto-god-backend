@@ -36,6 +36,11 @@ const UserModel: mongoose.Schema<IUser> = new mongoose.Schema(
       type: String,
       default: 'beginner',
     },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
     createdAt: {
       type: Date,
       required: true,

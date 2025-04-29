@@ -17,6 +17,7 @@ import commentRoutes from './routes/commentsRoute';
 import carRoutes from './routes/carRoute';
 import userRoutes from './routes/userRoute';
 import statsRoutes from './routes/statsRoute';
+import adminRoutes from './routes/adminRoute';
 // redis
 import redisClient from './database/redis';
 //logger
@@ -59,6 +60,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/car', carRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.listen(process.env.PORT, () => {
   logger.info('Server is running on port ' + process.env.PORT);
