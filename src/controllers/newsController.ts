@@ -28,7 +28,8 @@ export const createNews = async (
       authorId: req.userId,
       isMarkDown,
     });
-
+    await redisClient.del('allNews');
+    await redisClient.del(`topicNews:${topicId}`);
     await newNews.save();
     res
       .status(201)
