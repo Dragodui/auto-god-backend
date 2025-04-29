@@ -30,7 +30,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
-  mongoUrl: 'mongodb://127.0.0.1:27017/auto-god',
+  mongoUrl: `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER_NAME}.jnmyg7a.mongodb.net/${process.env.DB_NAME}`,
 });
 
 app.use(

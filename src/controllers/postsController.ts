@@ -50,7 +50,7 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
       res.status(200).json(JSON.parse(redisPosts));
       return;
     }
-    const posts: IPost[] | null = await Post.find();
+    const posts: IPost[] | null = await Post.find().sort({createdAt: -1});
     await redisClient.set('allPosts', JSON.stringify(posts), { EX: 900 });
     logger.info('Posts fetched from DB and cached');
     res.status(200).json(posts);
