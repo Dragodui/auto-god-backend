@@ -200,7 +200,6 @@ export const deleteNews = async (
 export const likeNews = async (req: Request, res: Response): Promise<void> => {
   try {
     const newsId = req.params.id;
-    console.log(newsId);
     logger.info(`Liking news ${newsId}`);
     const news: INews | null = await News.findById(newsId);
     if (!news) {

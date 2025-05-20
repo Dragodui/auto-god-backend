@@ -6,6 +6,10 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import './database/index';
+import mongoose from 'mongoose';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { ensureUploadsDir } from './utils/ensureUploadsDir';
 
 //routes
 import authRouter from './routes/authRoute';
@@ -18,6 +22,8 @@ import carRoutes from './routes/carRoute';
 import userRoutes from './routes/userRoute';
 import statsRoutes from './routes/statsRoute';
 import adminRoutes from './routes/adminRoute';
+import itemRoutes from './routes/itemsRoute';
+import chatRoutes from './routes/chatRoute';
 // redis
 import redisClient from './database/redis';
 //logger
@@ -26,7 +32,13 @@ import logger from './utils/logger';
 config();
 
 const app: Express = express();
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT_HOST || 'http://localhost:5173',
+    methods: ['GET', 'POST']
+  }
+});
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
@@ -61,7 +73,33 @@ app.use('/api/car', carRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/items', itemRoutes);
+app.use('/api/chat', chatRoutes);
 
-app.listen(process.env.PORT, () => {
-  logger.info('Server is running on port ' + process.env.PORT);
+// Ensure uploads directory exists
+ensureUploadsDir();
+
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  logger.info('User connected:', socket.id);
+
+  socket.on('join-chat', (chatId) => {
+    socket.join(chatId);
+  });
+
+  socket.on('disconnect', () => {
+    logger.info('User disconnected:', socket.id);
+  });
 });
+
+// Make io accessible to routes
+app.set('io', io);
+
+// Connect to MongoDB
+  const PORT = process.env.PORT!;
+  httpServer.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+  });

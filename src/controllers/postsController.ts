@@ -252,7 +252,6 @@ export const viewPost = async (req: Request, res: Response): Promise<void> => {
     }
 
     const userId = req.userId;
-    console.log(post);
     if (post.views.includes(userId as any)) {
       logger.warn(`POst ${postId} already viewed by user ${userId}`);
       res.status(400).json({ message: 'News already viewed' });
