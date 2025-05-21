@@ -4,7 +4,10 @@ import Comment from '../database/models/Comment';
 import News from '../database/models/News';
 import logger from '../utils/logger';
 
-export const deletePost = async (req: Request, res: Response): Promise<void> => {
+export const deletePost = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { postId } = req.params;
     await Post.findByIdAndDelete(postId);
@@ -17,7 +20,10 @@ export const deletePost = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const deleteComment = async (req: Request, res: Response): Promise<void> => {
+export const deleteComment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { commentId } = req.params;
     await Comment.findByIdAndDelete(commentId);
@@ -29,7 +35,10 @@ export const deleteComment = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteNews = async (req: Request, res: Response): Promise<void> => {
+export const deleteNews = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { newsId } = req.params;
     await News.findByIdAndDelete(newsId);
@@ -39,4 +48,4 @@ export const deleteNews = async (req: Request, res: Response): Promise<void> => 
     logger.error('Error deleting news:', error);
     res.status(500).json({ message: 'Error deleting news' });
   }
-}; 
+};

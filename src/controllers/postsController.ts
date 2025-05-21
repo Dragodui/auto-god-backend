@@ -6,7 +6,7 @@ import redisClient from '../database/redis';
 import { IPost, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
 import User from '../database/models/User';
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
 export const createPost = async (
   req: Request,
@@ -50,7 +50,7 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
       res.status(200).json(JSON.parse(redisPosts));
       return;
     }
-    const posts: IPost[] | null = await Post.find().sort({createdAt: -1});
+    const posts: IPost[] | null = await Post.find().sort({ createdAt: -1 });
     await redisClient.set('allPosts', JSON.stringify(posts), { EX: 900 });
     logger.info('Posts fetched from DB and cached');
     res.status(200).json(posts);

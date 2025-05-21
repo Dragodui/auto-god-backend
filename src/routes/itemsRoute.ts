@@ -5,7 +5,7 @@ import {
   getItems,
   getItemById,
   purchaseItem,
-  getUserItems
+  getUserItems,
 } from '../controllers/itemController';
 import { authenticateToken } from '../utils/authenticateToken';
 
@@ -20,4 +20,4 @@ router.post('/', authenticateToken, upload.array('photos', 5), createItem);
 router.post('/:id/purchase', authenticateToken, purchaseItem);
 router.get('/user/items', authenticateToken, getUserItems);
 
-export default router; 
+export default router;

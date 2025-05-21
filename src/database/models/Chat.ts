@@ -18,32 +18,37 @@ const MessageSchema = new Schema<IMessage>({
   sender: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   content: {
     type: String,
-    required: true
+    required: true,
   },
   timestamp: {
     type: Date,
-    default: Date.now
-  }
-});
-
-const ChatSchema = new Schema<IChat>({
-  participants: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }],
-  item: {
-    type: Schema.Types.ObjectId,
-    ref: 'Item',
-    required: true
+    default: Date.now,
   },
-  messages: [MessageSchema]
-}, {
-  timestamps: true
 });
 
-export default mongoose.model<IChat>('Chat', ChatSchema); 
+const ChatSchema = new Schema<IChat>(
+  {
+    participants: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+      },
+    ],
+    item: {
+      type: Schema.Types.ObjectId,
+      ref: 'Item',
+      required: true,
+    },
+    messages: [MessageSchema],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model<IChat>('Chat', ChatSchema);

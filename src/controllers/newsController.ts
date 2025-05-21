@@ -6,7 +6,7 @@ import redisClient from '../database/redis';
 import { INews, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
 import User from '../database/models/User';
-import {Types} from 'mongoose';
+import { Types } from 'mongoose';
 
 export const createNews = async (
   req: Request,

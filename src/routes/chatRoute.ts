@@ -4,7 +4,7 @@ import {
   createChat,
   getChats,
   getChatById,
-  sendMessage
+  sendMessage,
 } from '../controllers/chatController';
 
 const router = express.Router();
@@ -16,4 +16,4 @@ router.get('/', getChats);
 router.get('/:id', getChatById);
 router.post('/:id/messages', sendMessage);
 
-export default router; 
+export default router;

@@ -58,7 +58,7 @@ export const createComment = async (
 export const getComments = async (
   req: Request,
   res: Response
-): Promise<void> => { 
+): Promise<void> => {
   try {
     const postId = req.params.postId;
     logger.info(`Fetching comments for post ${postId}`);
@@ -84,9 +84,13 @@ export const getComments = async (
       if (author) comment.author = author;
     }
 
-    await redisClient.set(`postComments:${postId}`, JSON.stringify(parsedComments), {
-      EX: 300,
-    });
+    await redisClient.set(
+      `postComments:${postId}`,
+      JSON.stringify(parsedComments),
+      {
+        EX: 300,
+      }
+    );
 
     logger.info(
       `Comments for post ${postId} cached (count: ${parsedComments.length})`

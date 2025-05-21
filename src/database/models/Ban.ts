@@ -13,29 +13,29 @@ const BanSchema = new Schema<IBan>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   adminId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   reason: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   expiresAt: {
-    type: Date
+    type: Date,
   },
   isActive: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 });
 
-export default mongoose.model<IBan>('Ban', BanSchema); 
+export default mongoose.model<IBan>('Ban', BanSchema);

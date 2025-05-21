@@ -15,54 +15,57 @@ export interface IUser extends Document {
   isBanned: boolean;
 }
 
-const UserSchema = new Schema<IUser>({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
+const UserSchema = new Schema<IUser>(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
+    nickname: {
+      type: String,
+      unique: true,
+      default: '',
+    },
+    avatar: {
+      type: String,
+    },
+    car: {
+      type: String,
+      default: '',
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    rank: {
+      type: String,
+      default: 'beginner',
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
+    createdAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
   },
-  name: {
-    type: String,
-    required: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
-  },
-  nickname: {
-    type: String,
-    unique: true,
-    default: '',
-  },
-  avatar: {
-    type: String,
-  },
-  car: {
-    type: String,
-    default: '',
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  rank: {
-    type: String,
-    default: 'beginner',
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
-  },
-  createdAt: {
-    type: Date,
-    required: true,
-    default: Date.now,
-  },
-  isBanned: {
-    type: Boolean,
-    default: false,
-  },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 export default mongoose.model<IUser>('User', UserSchema);

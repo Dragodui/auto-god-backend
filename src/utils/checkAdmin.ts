@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import User from '../database/models/User';
-import logger  from './logger';
+import logger from './logger';
 
 export const checkAdmin = async (
   req: Request,
@@ -30,4 +30,4 @@ export const checkAdmin = async (
     logger.error('Error in checkAdmin middleware:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
-}; 
+};

@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
-import Chat, { IChat, IMessage } from '../models/Chat';
-import Item from '../models/Item';
+import Chat, { IChat, IMessage } from '../database/models/Chat';
+import Item from '../database/models/Item';
 import mongoose from 'mongoose';
 
-export const createChat = async (req: Request, res: Response): Promise<void> => {
+export const createChat = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { itemId } = req.params;
     const item = await Item.findById(itemId);
@@ -14,7 +17,7 @@ export const createChat = async (req: Request, res: Response): Promise<void> => 
     }
     const existingChat = await Chat.findOne({
       item: itemId,
-      participants: { $all: [req.userId, item.seller] }
+      participants: { $all: [req.userId, item.seller] },
     });
 
     if (existingChat) {
@@ -25,26 +28,26 @@ export const createChat = async (req: Request, res: Response): Promise<void> => 
     const chat = new Chat({
       participants: [req.userId, item.seller],
       item: itemId,
-      messages: []
+      messages: [],
     });
 
     await chat.save();
     res.status(201).json(chat);
-    return
+    return;
   } catch (error) {
     res.status(500).json({ message: 'Error creating chat', error });
-    return
+    return;
   }
 };
 
 export const getChats = async (req: Request, res: Response): Promise<void> => {
   try {
     const chats = await Chat.find({
-      participants: req.userId
+      participants: req.userId,
     })
-    .populate('participants', 'username email')
-    .populate('item', 'title photos')
-    .sort({ updatedAt: -1 });
+      .populate('participants', 'email nickname name avatar')
+      .populate('item', 'title photos')
+      .sort({ updatedAt: -1 });
 
     res.json(chats);
     return;
@@ -54,10 +57,13 @@ export const getChats = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getChatById = async (req: Request, res: Response): Promise<void> => {
+export const getChatById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const chat = await Chat.findById(req.params.id)
-      .populate('participants', 'username email')
+      .populate('participants', 'email nickname name avatar')
       .populate('item', 'title photos');
 
     if (!chat) {
@@ -66,7 +72,11 @@ export const getChatById = async (req: Request, res: Response): Promise<void> =>
     }
 
     // Check if user is a participant
-    if (!chat.participants.some(p => p._id.toString() === req.userId?.toString())) {
+    if (
+      !chat.participants.some(
+        (p) => p._id.toString() === req.userId?.toString()
+      )
+    ) {
       res.status(403).json({ message: 'Not authorized to access this chat' });
       return;
     }
@@ -79,36 +89,46 @@ export const getChatById = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const sendMessage = async (req: Request, res: Response): Promise<void> => {
+export const sendMessage = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { content } = req.body;
     const chat = await Chat.findById(req.params.id);
 
     if (!chat) {
-       res.status(404).json({ message: 'Chat not found' });
-       return;
-      }
+      res.status(404).json({ message: 'Chat not found' });
+      return;
+    }
 
     // Check if user is a participant
-    if (!chat.participants.some(p => p.toString() === req.userId?.toString())) {
-      res.status(403).json({ message: 'Not authorized to send messages in this chat' });
+    if (
+      !chat.participants.some((p) => p.toString() === req.userId?.toString())
+    ) {
+      res
+        .status(403)
+        .json({ message: 'Not authorized to send messages in this chat' });
       return;
     }
 
     const message: IMessage = {
       sender: new mongoose.Types.ObjectId(req.userId!),
       content,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     chat.messages.push(message);
     await chat.save();
 
     // Emit socket event for real-time updates
-    req.app.get('io').to((chat._id as string).toString()).emit('new-message', {
-      chatId: chat._id,
-      message
-    });
+    req.app
+      .get('io')
+      .to((chat._id as string).toString())
+      .emit('new-message', {
+        chatId: chat._id,
+        message,
+      });
 
     res.json(message);
     return;
@@ -116,4 +136,4 @@ export const sendMessage = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ message: 'Error sending message', error });
     return;
   }
-}; 
+};

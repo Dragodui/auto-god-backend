@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { authenticateToken } from '../utils/authenticateToken';
 import { checkAdmin } from '../utils/checkAdmin';
-import { banUser, unbanUser, getBannedUsers } from '../controllers/banController';
+import {
+  banUser,
+  unbanUser,
+  getBannedUsers,
+} from '../controllers/banController';
 
 const router = Router();
 
@@ -18,4 +22,4 @@ router.delete('/:userId', unbanUser);
 // Get all banned users
 router.get('/', getBannedUsers);
 
-export default router; 
+export default router;

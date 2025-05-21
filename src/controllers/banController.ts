@@ -27,14 +27,16 @@ export const banUser = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Calculate expiration date if duration is provided (in days)
-    const expiresAt = duration ? new Date(Date.now() + duration * 24 * 60 * 60 * 1000) : undefined;
+    const expiresAt = duration
+      ? new Date(Date.now() + duration * 24 * 60 * 60 * 1000)
+      : undefined;
 
     const ban = new Ban({
       userId,
       adminId,
       reason,
       expiresAt,
-      isActive: true
+      isActive: true,
     });
 
     await ban.save();
@@ -85,7 +87,10 @@ export const unbanUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getBannedUsers = async (req: Request, res: Response): Promise<void> => {
+export const getBannedUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const bans = await Ban.find({ isActive: true })
       .populate('userId', 'username email')
@@ -97,4 +102,4 @@ export const getBannedUsers = async (req: Request, res: Response): Promise<void>
     logger.error('Error fetching banned users:', error);
     res.status(500).json({ message: 'Error fetching banned users' });
   }
-}; 
+};
