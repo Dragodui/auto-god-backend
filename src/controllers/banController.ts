@@ -6,7 +6,7 @@ import logger from '../utils/logger';
 export const banUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId, reason, duration } = req.body;
-    const adminId = req.user?._id;
+    const adminId = req.userId;
 
     if (!adminId) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -56,7 +56,7 @@ export const banUser = async (req: Request, res: Response): Promise<void> => {
 export const unbanUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
-    const adminId = req.user?._id;
+    const adminId = req.userId;
 
     if (!adminId) {
       res.status(401).json({ message: 'Unauthorized' });

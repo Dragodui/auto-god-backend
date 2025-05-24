@@ -5,7 +5,7 @@ config();
 
 mongoose
   .connect(
-    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER_NAME}.jnmyg7a.mongodb.net/${process.env.DB_NAME}`
+    process.env.MONGODB_URI || 'mongodb://localhost:27017/auto-god',
   )
   .then(() => logger.info('Connected to the database'))
   .catch((error) =>

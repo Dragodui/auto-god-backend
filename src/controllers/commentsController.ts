@@ -48,7 +48,8 @@ export const createComment = async (
     await redisClient.del(`postComments:${postId}`);
 
     logger.info(`Comment created (ID: ${newComment._id}) for post ${postId}`);
-    res.status(201).json({ message: 'Comment created', newComment });
+    const commentWithAuthor = await Comment.findById(newComment._id).populate("authorId", "-password");
+    res.status(200).json(commentWithAuthor);
   } catch (error) {
     logger.error('Error creating comment:', error);
     res.status(500).json({ message: 'Server error' });

@@ -42,7 +42,7 @@ const io = new Server(httpServer, {
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
-  mongoUrl: `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER_NAME}.jnmyg7a.mongodb.net/${process.env.DB_NAME}`,
+  mongoUrl: process.env.MONGODB_URI!
 });
 
 app.use(

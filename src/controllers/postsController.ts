@@ -26,8 +26,6 @@ export const createPost = async (
       content,
       tags,
       topicId,
-      likes: 0,
-      views: 0,
       authorId: userId,
     });
     await newPost.save();
