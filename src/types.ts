@@ -46,6 +46,21 @@ export interface IComment extends Document {
   likes: mongoose.Types.ObjectId[];
 }
 
+export interface IEvent extends Document {
+  author?: IUser;
+  authorId: mongoose.Types.ObjectId;
+  date: Date;
+  title: string;
+  place: string
+  content: string;
+  createdAt: Date;
+  likes: mongoose.Types.ObjectId[];
+  views: mongoose.Types.ObjectId[];
+  tags: mongoose.Types.ObjectId[];
+  image: string;
+  isAccepted: boolean;
+}
+
 export interface ITag extends Document {
   title: string;
 }

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { ICar } from '../../types';
 
-const CarModel: mongoose.Schema<ICar> = new mongoose.Schema(
+const CarSchema: mongoose.Schema<ICar> = new mongoose.Schema(
   {
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,4 +28,4 @@ const CarModel: mongoose.Schema<ICar> = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model('cars', CarModel);
+export default mongoose.model('cars', CarSchema);

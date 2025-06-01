@@ -12,12 +12,12 @@ export interface IBan extends Document {
 const BanSchema = new Schema<IBan>({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'users',
     required: true,
   },
   adminId: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'users',
     required: true,
   },
   reason: {

@@ -3,10 +3,11 @@ import Comment from '../database/models/Comment';
 import Post from '../database/models/Post';
 import redisClient from '../database/redis';
 import logger from '../utils/logger';
-import { IComment, INews, IPost } from '../types';
+import { IComment, IEvent, INews, IPost } from '../types';
 import New from '../database/models/News';
 import User from '../database/models/User';
 import { Types } from 'mongoose';
+import Event from '../database/models/Event';
 
 export const createComment = async (
   req: Request,
@@ -28,12 +29,16 @@ export const createComment = async (
 
     const post: IPost | null = await Post.findById(postId);
     let news: INews | null = null;
+    let event: IEvent | null = null;
     if (!post) {
       news = await New.findById(postId);
       if (!news) {
-        logger.warn(`Post not found (ID: ${postId})`);
-        res.status(404).json({ message: 'Post not found' });
-        return;
+       event = await Event.findById(postId);
+        if (!event) {
+           logger.warn(`Post not found (ID: ${postId})`);
+            res.status(404).json({ message: 'Post not found' });
+            return;
+        }
       }
     }
 
@@ -45,7 +50,7 @@ export const createComment = async (
     });
     await newComment.save();
 
-    await redisClient.del(`postComments:${postId}`);
+    await redisClient.del(`comments:${postId}`);
 
     logger.info(`Comment created (ID: ${newComment._id}) for post ${postId}`);
     const commentWithAuthor = await Comment.findById(newComment._id).populate("authorId", "-password");
@@ -64,7 +69,7 @@ export const getComments = async (
     const postId = req.params.postId;
     logger.info(`Fetching comments for post ${postId}`);
 
-    const cachedComments = await redisClient.get(`postComments:${postId}`);
+    const cachedComments = await redisClient.get(`comments:${postId}`);
     if (cachedComments) {
       logger.info(`Comments for post ${postId} fetched from cache`);
       res.status(200).json(JSON.parse(cachedComments));
@@ -86,7 +91,7 @@ export const getComments = async (
     }
 
     await redisClient.set(
-      `postComments:${postId}`,
+      `comments:${postId}`,
       JSON.stringify(parsedComments),
       {
         EX: 300,
@@ -133,7 +138,7 @@ export const likeComment = async (
       await comment.save();
     }
 
-    await redisClient.del(`postComments:${comment.postId}`);
+    await redisClient.del(`comments:${comment.postId}`);
 
     logger.info(`Comment ${id} liked, total likes: ${comment.likes}`);
     res.status(200).json({ message: 'Comment liked' });

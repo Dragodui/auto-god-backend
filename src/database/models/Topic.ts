@@ -2,7 +2,7 @@ import { ITopic } from '../../types';
 
 import mongoose from 'mongoose';
 
-const TopicModel: mongoose.Schema<ITopic> = new mongoose.Schema({
+const TopicSchema: mongoose.Schema<ITopic> = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -14,4 +14,4 @@ const TopicModel: mongoose.Schema<ITopic> = new mongoose.Schema({
   },
 });
 
-export default mongoose.model('topics', TopicModel);
+export default mongoose.model('topics', TopicSchema);

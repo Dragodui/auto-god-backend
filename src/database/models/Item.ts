@@ -36,7 +36,7 @@ const ItemSchema = new Schema<IItem>(
     ],
     seller: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'users',
       required: true,
     },
     status: {
@@ -46,7 +46,7 @@ const ItemSchema = new Schema<IItem>(
     },
     buyer: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'users',
     },
   },
   {

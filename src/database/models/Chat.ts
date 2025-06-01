@@ -17,7 +17,7 @@ export interface IChat extends Document {
 const MessageSchema = new Schema<IMessage>({
   sender: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'users',
     required: true,
   },
   content: {
@@ -35,7 +35,7 @@ const ChatSchema = new Schema<IChat>(
     participants: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true,
       },
     ],

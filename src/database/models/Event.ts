@@ -1,8 +1,8 @@
-import { IPost } from '../../types';
+import { IEvent } from '../../types';
 
 import mongoose from 'mongoose';
 
-const PostSchema: mongoose.Schema<IPost> = new mongoose.Schema({
+const EventSchema: mongoose.Schema<IEvent> = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -26,9 +26,7 @@ const PostSchema: mongoose.Schema<IPost> = new mongoose.Schema({
     ref: 'users',
     default: [],
   },
-  image: {
-    type: String,
-  },
+ 
   tags: {
     type: [mongoose.Schema.Types.ObjectId],
     required: true,
@@ -39,11 +37,23 @@ const PostSchema: mongoose.Schema<IPost> = new mongoose.Schema({
     required: true,
     ref: 'users',
   },
-  topicId: {
-    type: mongoose.Schema.Types.ObjectId,
+  date: {
+    type: Date,
     required: true,
-    ref: 'topics',
   },
+  place: {
+    type: String,
+    required: true,
+  },
+    image: {
+        type: String,
+    },
+    isAccepted: {
+        type: Boolean,
+        required: true,
+        default: false,
+    }
+    
 });
 
-export default mongoose.model('posts', PostSchema);
+export default mongoose.model('events', EventSchema);

@@ -2,7 +2,7 @@ import { IComment } from '../../types';
 
 import mongoose from 'mongoose';
 
-const CommentModel: mongoose.Schema<IComment> = new mongoose.Schema({
+const CommentSchema: mongoose.Schema<IComment> = new mongoose.Schema({
   authorId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -34,4 +34,4 @@ const CommentModel: mongoose.Schema<IComment> = new mongoose.Schema({
   },
 });
 
-export default mongoose.model('comments', CommentModel);
+export default mongoose.model('comments', CommentSchema);

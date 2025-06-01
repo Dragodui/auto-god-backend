@@ -2,7 +2,7 @@ import { INews } from '../../types';
 
 import mongoose from 'mongoose';
 
-const NewsModel: mongoose.Schema<INews> = new mongoose.Schema({
+const NewsSchema: mongoose.Schema<INews> = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -51,4 +51,4 @@ const NewsModel: mongoose.Schema<INews> = new mongoose.Schema({
   },
 });
 
-export default mongoose.model('news', NewsModel);
+export default mongoose.model('news', NewsSchema);

@@ -24,6 +24,7 @@ import statsRoutes from './routes/statsRoute';
 import adminRoutes from './routes/adminRoute';
 import itemRoutes from './routes/itemsRoute';
 import chatRoutes from './routes/chatRoute';
+import eventsRoutes from './routes/eventsRoute';
 // redis
 import redisClient from './database/redis';
 //logger
@@ -75,6 +76,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/events', eventsRoutes)
 
 // Ensure uploads directory exists
 ensureUploadsDir();
