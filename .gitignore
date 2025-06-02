@@ -144,3 +144,9 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node
 *jpg
 *png
+*jpeg
+*gif
+*svg
+*webp
+*jfif
+*avif
