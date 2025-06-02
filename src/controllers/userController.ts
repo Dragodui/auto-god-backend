@@ -5,6 +5,8 @@ import Comment from '../database/models/Comment';
 import logger from '../utils/logger';
 import Post from '../database/models/Post';
 import redisClient from '../database/redis';
+import comparePasswords from '../utils/comparePasswords';
+import { hashPassword } from '../utils/hashPassword';
 
 interface IActivity {
   post: IPost;
@@ -137,3 +139,42 @@ export const getUserById = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const changePassword = async(req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      res.status(400).json({ message: 'Old and new passwords are required' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const isMatch = await comparePasswords(oldPassword, user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: 'Old password is incorrect' });
+      return;
+    }
+
+    user.password = await hashPassword(newPassword);
+    await user.save();
+    
+    await redisClient.del(`userInfo:${userId}`);
+    logger.info(`User ${userId} changed password`);
+    
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    logger.error('Error changing password:', error);
+    res.status(500).json({ message: 'Server error' });  
+  }
+}

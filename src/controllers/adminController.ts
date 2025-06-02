@@ -13,11 +13,17 @@ export const deletePost = async (
 ): Promise<void> => {
   try {
     const { postId } = req.params;
+    const post = await Post.findById(postId);
+    
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
     await Post.findByIdAndDelete(postId);
     await Comment.deleteMany({ postId });
     await redisClient.del(`post:${postId}`);
     await redisClient.del('allPosts');
-    await redisClient.del(`topicPosts:${(await Post.findById({postId}))?.topicId}`);
+    await redisClient.del(`topicPosts:${post.topicId}`);
     logger.info(`Post ${postId} and its comments deleted by admin`);
     res.json({ message: 'Post and its comments deleted successfully' });
     return;
@@ -34,6 +40,11 @@ export const deleteComment = async (
 ): Promise<void> => {
   try {
     const { commentId } = req.params;
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      res.status(404).json({ message: 'Comment not found' });
+      return;
+    }
     await Comment.findByIdAndDelete(commentId);
     const postId = await Comment.findById(commentId).then(comment => comment?.postId);
     await redisClient.del(`comments:${postId}`);
@@ -53,10 +64,15 @@ export const deleteNews = async (
 ): Promise<void> => {
   try {
     const { newsId } = req.params;
+    const news = await News.findById(newsId);
+    if (!news) {
+      res.status(404).json({ message: 'News not found' });
+      return;
+    }
     await News.findByIdAndDelete(newsId);
     await redisClient.del(`news:${newsId}`);
     await redisClient.del('allNews');
-    await redisClient.del(`topicNews:${(await News.findById({newsId}))?.topicId}`);
+    await redisClient.del(`topicNews:${news.topicId}`);
     logger.info(`News ${newsId} deleted by admin`);
     res.json({ message: 'News deleted successfully' });
     return;
@@ -70,6 +86,11 @@ export const deleteNews = async (
 export const deleteEvent = async(req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
+    const event = await Event.findById(eventId);
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' });
+      return;
+    }
     await Event.findByIdAndDelete(eventId);
     await redisClient.del(`event:${eventId}`);
     await redisClient.del('allEvents');

@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response) => {
       email: req.body.email,
       name: req.body.name,
       lastName: req.body.lastName,
-      nickname: req.body.nickname,
+      nickname: req.body.nickname || `${req.body.name}${req.body.lastName.toUpperCase()}${Math.floor(Math.random() * 1000)}`,
       password: passwordHash,
     });
 

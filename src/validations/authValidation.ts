@@ -25,3 +25,12 @@ export const loginValidation = [
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
 ];
+
+export const changePasswordValidation = [
+  body('oldPassword')
+    .isLength({ min: 6 })
+    .withMessage('Old password must be at least 6 characters long'),
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters long'),
+]
