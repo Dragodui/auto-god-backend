@@ -51,6 +51,13 @@ export const createComment = async (
     await newComment.save();
 
     await redisClient.del(`comments:${postId}`);
+    await redisClient.del(`post:${postId}`);
+    if (news) {
+      await redisClient.del(`news:${postId}`);
+    }
+    if (event) {
+      await redisClient.del(`event:${postId}`);
+    }
 
     logger.info(`Comment created (ID: ${newComment._id}) for post ${postId}`);
     const commentWithAuthor = await Comment.findById(newComment._id).populate("authorId", "-password");

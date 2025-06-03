@@ -7,6 +7,7 @@ import { IPost, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
 import User from '../database/models/User';
 import { Types } from 'mongoose';
+import Comment from '../database/models/Comment';
 
 export const createPost = async (
   req: Request,
@@ -144,6 +145,7 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
     const topic = await Topic.findById(post.topicId);
     const tags = await Tag.find({ _id: { $in: post.tags } });
     const author = await User.findById(post.authorId).select('-password');
+    const comments = await Comment.find({ postId: post._id });
     const postObject = {
       id: post._id,
       title: post.title,
@@ -155,6 +157,7 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
       createdAt: post.createdAt,
       author: author,
       tags: tags.map((tag: ITag) => tag.title),
+      comments,
     };
     await redisClient.set(`post:${postId}`, JSON.stringify(postObject), {
       EX: 900,
@@ -261,7 +264,7 @@ export const viewPost = async (req: Request, res: Response): Promise<void> => {
     const redisPost = await redisClient.get(`post:${postId}`);
     if (redisPost) {
       const parsedPost = JSON.parse(redisPost);
-      parsedPost.likes = post.likes;
+      parsedPost.views = post.views;
       await redisClient.set(`post:${postId}`, JSON.stringify(parsedPost), {
         EX: 900,
       });

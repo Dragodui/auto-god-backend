@@ -7,6 +7,7 @@ import { INews, ITag, ITopic } from '../types';
 import logger from '../utils/logger';
 import User from '../database/models/User';
 import { Types } from 'mongoose';
+import Comment from '../database/models/Comment';
 
 export const createNews = async (
   req: Request,
@@ -148,6 +149,7 @@ export const getOneNews = async (
     const topic = await Topic.findById(news.topicId);
     const tags = await Tag.find({ _id: { $in: news.tags } });
     const author = await User.findById(news.authorId).select('-password');
+    const comments = await Comment.find({ postId: news._id });
     const newsObject = {
       id: news._id,
       title: news.title,
@@ -160,6 +162,7 @@ export const getOneNews = async (
       image: news.image,
       tags: tags.map((tag: ITag) => tag.title),
       createdAt: news.createdAt,
+      comments
     };
     await redisClient.set(`news:${newsId}`, JSON.stringify(newsObject), {
       EX: 900,
@@ -264,7 +267,7 @@ export const viewNews = async (req: Request, res: Response): Promise<void> => {
     const redisNews = await redisClient.get(`news:${newsId}`);
     if (redisNews) {
       const parsedNews = JSON.parse(redisNews);
-      parsedNews.likes = news.likes;
+      parsedNews.views = news.views;
       await redisClient.set(`news:${newsId}`, JSON.stringify(parsedNews), {
         EX: 900,
       });
