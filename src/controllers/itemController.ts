@@ -4,6 +4,7 @@ import Item, { IItem } from '../database/models/Item';
 import { ensureUploadsDir } from '../utils/ensureUploadsDir';
 import fs from 'fs';
 import path from 'path';
+import logger from '../utils/logger';
 
 export const createItem = async (
   req: Request,
@@ -70,6 +71,24 @@ export const getItems = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const getUserItems = async(req: Request, res: Response): Promise<void> => {
+  try {
+    const items = await Item.find({ seller: req.userId })
+      .populate('seller', 'name lastName email')
+      .sort({ createdAt: -1 });
+    if (!items || items.length === 0) {
+      res.status(404).json({ message: 'No items found for this user' });
+      return;
+    }
+    res.status(200).json(items);
+    return;
+  } catch (error) {
+    logger.error('Error fetching my items:', error);
+    res.status(500).json({ message: 'Error fetching my items', error });
+    return;
+  }
+}
+
 export const getItemById = async (
   req: Request,
   res: Response
@@ -125,18 +144,3 @@ export const purchaseItem = async (
   }
 };
 
-export const getUserItems = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const items = await Item.find({ seller: req.userId }).sort({
-      createdAt: -1,
-    });
-    res.json(items);
-    return;
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching user items', error });
-    return;
-  }
-};

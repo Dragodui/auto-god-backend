@@ -12,8 +12,8 @@ import { authenticateToken } from '../utils/authenticateToken';
 const router = express.Router();
 
 // Public routes
-router.get('/', getItems as RequestHandler);
-router.get('/:id', getItemById as RequestHandler);
+router.get('/', getItems);
+router.get('/:id', getItemById);
 
 // Protected routes
 router.post('/', authenticateToken, upload.array('photos', 5), createItem);

@@ -7,6 +7,7 @@ import Post from '../database/models/Post';
 import redisClient from '../database/redis';
 import comparePasswords from '../utils/comparePasswords';
 import { hashPassword } from '../utils/hashPassword';
+import mongoose from 'mongoose';
 
 interface IActivity {
   post: IPost;
@@ -91,33 +92,99 @@ export const getUserLastActivity = async (req: Request, res: Response) => {
       res.status(401).json({ message: 'Unauthorized' });
       return;
     }
+
     const user = await User.findById(userId);
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
     }
+
+    // Get last 3 comments by user
     const lastActivityComments: IComment[] = await Comment.find({
       authorId: userId,
     })
       .sort({ createdAt: -1 })
       .limit(3);
-    const lastActivityCommentsIds: { postId: string }[] =
-      lastActivityComments.map((comment: IComment) => ({
-        postId: comment.postId.toString(),
-      }));
-    let lastActivityPosts: IActivity[] = [];
-    for (let id of lastActivityCommentsIds) {
-      const post = await Post.findById(id);
-      if (post) {
-        lastActivityPosts.push({
-          post: post,
-          comment:
-            lastActivityComments.find(
-              (comment: IComment) => comment.postId.toString() === id.postId
-            ) || '',
-        });
-      }
+
+    // Extract post IDs (as strings, not objects)
+    const postIds: string[] = lastActivityComments.map((comment: IComment) => 
+      comment.postId.toString()
+    );
+
+    // Get posts for those IDs
+    const posts = await Post.find({
+      _id: { $in: postIds }
+    });
+
+    // Build activity array
+    const lastActivityPosts: IActivity[] = posts.map(post => {
+      const relatedComment = lastActivityComments.find(
+        (comment: IComment) => comment.postId.toString() === (post._id as string).toString()
+      );
+      
+      return {
+        post: post,
+        comment: relatedComment || '',
+      };
+    });
+
+    res.status(200).json({ lastActivityPosts });
+  } catch (error) {
+    logger.error('Error getting user last activity:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getUserLastActivityOptimized = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
     }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const lastActivityPosts = await Comment.aggregate([
+      {
+        $match: { authorId: new mongoose.Types.ObjectId(userId) }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $limit: 3
+      },
+      {
+        $lookup: {
+          from: 'posts', 
+          localField: 'postId',
+          foreignField: '_id',
+          as: 'post'
+        }
+      },
+      {
+        $unwind: '$post'
+      },
+      {
+        $project: {
+          post: '$post',
+          comment: {
+            _id: '$_id',
+            content: '$content',
+            createdAt: '$createdAt',
+            authorId: '$authorId',
+            postId: '$postId'
+          }
+        }
+      }
+    ]);
+
     res.status(200).json({ lastActivityPosts });
   } catch (error) {
     logger.error('Error getting user last activity:', error);
