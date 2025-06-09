@@ -22,6 +22,12 @@ router.post(
 router.put('/data', authenticateToken, updateUserData);
 router.get('/activity', authenticateToken, getUserLastActivity);
 router.get('/:id', getUserById);
-router.patch('/changePassword', changePasswordValidation, handleErrors, authenticateToken, changePassword);
+router.patch(
+  '/changePassword',
+  changePasswordValidation,
+  handleErrors,
+  authenticateToken,
+  changePassword
+);
 
 export default router;

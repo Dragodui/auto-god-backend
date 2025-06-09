@@ -26,7 +26,7 @@ const EventSchema: mongoose.Schema<IEvent> = new mongoose.Schema({
     ref: 'users',
     default: [],
   },
- 
+
   tags: {
     type: [mongoose.Schema.Types.ObjectId],
     required: true,
@@ -45,15 +45,14 @@ const EventSchema: mongoose.Schema<IEvent> = new mongoose.Schema({
     type: String,
     required: true,
   },
-    image: {
-        type: String,
-    },
-    isAccepted: {
-        type: Boolean,
-        required: true,
-        default: false,
-    }
-    
+  image: {
+    type: String,
+  },
+  isAccepted: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 });
 
 export default mongoose.model('events', EventSchema);

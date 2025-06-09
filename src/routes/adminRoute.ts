@@ -21,10 +21,7 @@ router.delete(
 );
 router.delete('/news/:newsId', authenticateToken, checkAdmin, deleteNews);
 router.delete('/events/:eventId', authenticateToken, checkAdmin, deleteEvent);
-router.put(
-  '/events/:eventId',
-  authenticateToken,
-  checkAdmin, acceptEvent)
-router.get('/events', authenticateToken, checkAdmin, getUnacceptedEvents)
+router.put('/events/:eventId', authenticateToken, checkAdmin, acceptEvent);
+router.get('/events', authenticateToken, checkAdmin, getUnacceptedEvents);
 
 export default router;

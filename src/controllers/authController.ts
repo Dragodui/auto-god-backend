@@ -19,7 +19,9 @@ export const register = async (req: Request, res: Response) => {
       email: req.body.email,
       name: req.body.name,
       lastName: req.body.lastName,
-      nickname: req.body.nickname || `${req.body.name}${req.body.lastName.toUpperCase()}${Math.floor(Math.random() * 1000)}`,
+      nickname:
+        req.body.nickname ||
+        `${req.body.name}${req.body.lastName.toUpperCase()}${Math.floor(Math.random() * 1000)}`,
       password: passwordHash,
     });
 
@@ -135,16 +137,17 @@ export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     // const userId = req.userId;
-    
-     if (!email) {
+
+    if (!email) {
       res.status(400).json({ message: 'Email is not found' });
       return;
     }
 
     const user: IUser | null = await User.findOne({ email });
     if (!user) {
-      res.status(200).json({ 
-        message: 'If an account with that email exists, a password reset link has been sent.' 
+      res.status(200).json({
+        message:
+          'If an account with that email exists, a password reset link has been sent.',
       });
       return;
     }
@@ -186,8 +189,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
     await transporter.sendMail(mailOptions);
     logger.info(`Password reset email sent to ${email}`);
 
-    res.status(200).json({ 
-      message: 'If an account with that email exists, a password reset link has been sent.' 
+    res.status(200).json({
+      message:
+        'If an account with that email exists, a password reset link has been sent.',
     });
   } catch (error) {
     logger.error('Error during forgot password:', error);
@@ -200,7 +204,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
-    
+
     if (!token || !password) {
       res.status(400).json({ message: 'Token and new password are required' });
       return;
@@ -243,4 +247,3 @@ export const resetPassword = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-

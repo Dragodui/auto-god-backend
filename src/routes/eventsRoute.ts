@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import { authenticateToken } from '../utils/authenticateToken';
 
-import { createEvent, getEvent, getEvents, likeEvent, viewEvent, uploadEventImage } from '../controllers/eventsController';
+import {
+  createEvent,
+  getEvent,
+  getEvents,
+  likeEvent,
+  viewEvent,
+  uploadEventImage,
+} from '../controllers/eventsController';
 import upload from '../utils/multerConfig';
 
 const router = Router();

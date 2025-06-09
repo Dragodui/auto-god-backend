@@ -33,11 +33,11 @@ export const createComment = async (
     if (!post) {
       news = await New.findById(postId);
       if (!news) {
-       event = await Event.findById(postId);
+        event = await Event.findById(postId);
         if (!event) {
-           logger.warn(`Post not found (ID: ${postId})`);
-            res.status(404).json({ message: 'Post not found' });
-            return;
+          logger.warn(`Post not found (ID: ${postId})`);
+          res.status(404).json({ message: 'Post not found' });
+          return;
         }
       }
     }
@@ -60,7 +60,10 @@ export const createComment = async (
     }
 
     logger.info(`Comment created (ID: ${newComment._id}) for post ${postId}`);
-    const commentWithAuthor = await Comment.findById(newComment._id).populate("authorId", "-password");
+    const commentWithAuthor = await Comment.findById(newComment._id).populate(
+      'authorId',
+      '-password'
+    );
     res.status(200).json(commentWithAuthor);
   } catch (error) {
     logger.error('Error creating comment:', error);

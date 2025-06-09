@@ -14,7 +14,7 @@ export const deletePost = async (
   try {
     const { postId } = req.params;
     const post = await Post.findById(postId);
-    
+
     if (!post) {
       res.status(404).json({ message: 'Post not found' });
       return;
@@ -45,8 +45,10 @@ export const deleteComment = async (
       res.status(404).json({ message: 'Comment not found' });
       return;
     }
+     const postId = await Comment.findById(commentId).then(
+      (comment) => comment?.postId
+    );
     await Comment.findByIdAndDelete(commentId);
-    const postId = await Comment.findById(commentId).then(comment => comment?.postId);
     await redisClient.del(`comments:${postId}`);
     logger.info(`Comment ${commentId} deleted by admin`);
     res.json({ message: 'Comment deleted successfully' });
@@ -83,7 +85,7 @@ export const deleteNews = async (
   }
 };
 
-export const deleteEvent = async(req: Request, res: Response) => {
+export const deleteEvent = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
     const event = await Event.findById(eventId);
@@ -102,14 +104,18 @@ export const deleteEvent = async(req: Request, res: Response) => {
     res.status(500).json({ message: 'Error deleting event' });
     return;
   }
-}
-export const acceptEvent = async(req: Request, res: Response) => {
+};
+export const acceptEvent = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
-    const event: IEvent | null = await Event.findByIdAndUpdate(eventId, {
-      isAccepted: true,
-    }, { new: true });
-    
+    const event: IEvent | null = await Event.findByIdAndUpdate(
+      eventId,
+      {
+        isAccepted: true,
+      },
+      { new: true }
+    );
+
     if (!event) {
       res.status(404).json({ message: 'Event not found' });
       return;
@@ -126,24 +132,26 @@ export const acceptEvent = async(req: Request, res: Response) => {
     res.status(500).json({ message: 'Error accepting event' });
     return;
   }
-}
+};
 
 export const getUnacceptedEvents = async (req: Request, res: Response) => {
   try {
-        const cachedEvents = await redisClient.get("allUnacceptedEvents");
-        if (cachedEvents) {
-            logger.info("Unaccepted events fetched from cache");
-            res.status(200).json(JSON.parse(cachedEvents));
-            return;
-        }
-        const events = await Event.find({isAccepted: false}).populate("authorId", "name avatar").sort({ createdAt: -1 });
-        redisClient.set("allUnacceptedEvents", JSON.stringify(events), { EX: 900 });
-        logger.info("Events fetched successfully");
-        res.status(200).json(events);
-        return;
-    } catch (error) {
-        logger.error("Error fetching events:", error);
-        res.status(500).json({ message: "Internal server error" });
-        return;
+    const cachedEvents = await redisClient.get('allUnacceptedEvents');
+    if (cachedEvents) {
+      logger.info('Unaccepted events fetched from cache');
+      res.status(200).json(JSON.parse(cachedEvents));
+      return;
     }
-}
+    const events = await Event.find({ isAccepted: false })
+      .populate('authorId', 'name avatar')
+      .sort({ createdAt: -1 });
+    redisClient.set('allUnacceptedEvents', JSON.stringify(events), { EX: 900 });
+    logger.info('Events fetched successfully');
+    res.status(200).json(events);
+    return;
+  } catch (error) {
+    logger.error('Error fetching events:', error);
+    res.status(500).json({ message: 'Internal server error' });
+    return;
+  }
+};

@@ -162,7 +162,7 @@ export const getOneNews = async (
       image: news.image,
       tags: tags.map((tag: ITag) => tag.title),
       createdAt: news.createdAt,
-      comments
+      comments,
     };
     await redisClient.set(`news:${newsId}`, JSON.stringify(newsObject), {
       EX: 900,

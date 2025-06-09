@@ -54,7 +54,7 @@ export interface IEvent extends Document {
   authorId: mongoose.Types.ObjectId;
   date: Date;
   title: string;
-  place: string
+  place: string;
   content: string;
   createdAt: Date;
   likes: mongoose.Types.ObjectId[];

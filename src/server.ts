@@ -44,7 +44,7 @@ const io = new Server(httpServer, {
 
 app.use(express.json());
 const mongoStore = MongoStore.create({
-  mongoUrl: process.env.MONGODB_URI!
+  mongoUrl: process.env.MONGODB_URI!,
 });
 
 app.use(
@@ -77,7 +77,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/events', eventsRoutes)
+app.use('/api/events', eventsRoutes);
 
 // Ensure uploads directory exists
 ensureUploadsDir();

@@ -107,21 +107,22 @@ export const getUserLastActivity = async (req: Request, res: Response) => {
       .limit(3);
 
     // Extract post IDs (as strings, not objects)
-    const postIds: string[] = lastActivityComments.map((comment: IComment) => 
+    const postIds: string[] = lastActivityComments.map((comment: IComment) =>
       comment.postId.toString()
     );
 
     // Get posts for those IDs
     const posts = await Post.find({
-      _id: { $in: postIds }
+      _id: { $in: postIds },
     });
 
     // Build activity array
-    const lastActivityPosts: IActivity[] = posts.map(post => {
+    const lastActivityPosts: IActivity[] = posts.map((post) => {
       const relatedComment = lastActivityComments.find(
-        (comment: IComment) => comment.postId.toString() === (post._id as string).toString()
+        (comment: IComment) =>
+          comment.postId.toString() === (post._id as string).toString()
       );
-      
+
       return {
         post: post,
         comment: relatedComment || '',
@@ -135,7 +136,10 @@ export const getUserLastActivity = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserLastActivityOptimized = async (req: Request, res: Response) => {
+export const getUserLastActivityOptimized = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const userId = req.userId;
 
@@ -152,24 +156,24 @@ export const getUserLastActivityOptimized = async (req: Request, res: Response) 
 
     const lastActivityPosts = await Comment.aggregate([
       {
-        $match: { authorId: new mongoose.Types.ObjectId(userId) }
+        $match: { authorId: new mongoose.Types.ObjectId(userId) },
       },
       {
-        $sort: { createdAt: -1 }
+        $sort: { createdAt: -1 },
       },
       {
-        $limit: 3
+        $limit: 3,
       },
       {
         $lookup: {
-          from: 'posts', 
+          from: 'posts',
           localField: 'postId',
           foreignField: '_id',
-          as: 'post'
-        }
+          as: 'post',
+        },
       },
       {
-        $unwind: '$post'
+        $unwind: '$post',
       },
       {
         $project: {
@@ -179,10 +183,10 @@ export const getUserLastActivityOptimized = async (req: Request, res: Response) 
             content: '$content',
             createdAt: '$createdAt',
             authorId: '$authorId',
-            postId: '$postId'
-          }
-        }
-      }
+            postId: '$postId',
+          },
+        },
+      },
     ]);
 
     res.status(200).json({ lastActivityPosts });
@@ -207,7 +211,7 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-export const changePassword = async(req: Request, res: Response) => {
+export const changePassword = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     if (!userId) {
@@ -235,13 +239,13 @@ export const changePassword = async(req: Request, res: Response) => {
 
     user.password = await hashPassword(newPassword);
     await user.save();
-    
+
     await redisClient.del(`userInfo:${userId}`);
     logger.info(`User ${userId} changed password`);
-    
+
     res.status(200).json({ message: 'Password changed successfully' });
   } catch (error) {
     logger.error('Error changing password:', error);
-    res.status(500).json({ message: 'Server error' });  
+    res.status(500).json({ message: 'Server error' });
   }
-}
+};

@@ -71,7 +71,10 @@ export const getItems = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getUserItems = async(req: Request, res: Response): Promise<void> => {
+export const getUserItems = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const items = await Item.find({ seller: req.userId })
       .populate('seller', 'name lastName email')
@@ -87,7 +90,7 @@ export const getUserItems = async(req: Request, res: Response): Promise<void> =>
     res.status(500).json({ message: 'Error fetching my items', error });
     return;
   }
-}
+};
 
 export const getItemById = async (
   req: Request,
@@ -143,4 +146,3 @@ export const purchaseItem = async (
     res.status(500).json({ message: 'Error purchasing item', error });
   }
 };
-
