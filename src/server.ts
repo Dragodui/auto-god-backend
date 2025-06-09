@@ -29,6 +29,7 @@ import eventsRoutes from './routes/eventsRoute';
 import redisClient from './database/redis';
 //logger
 import logger from './utils/logger';
+import { verifyEmailConnection } from './middleware/mailer';
 
 config();
 
@@ -100,6 +101,7 @@ io.on('connection', (socket) => {
 // Make io accessible to routes
 app.set('io', io);
 
+verifyEmailConnection();
 // Connect to MongoDB
 const PORT = process.env.PORT!;
 httpServer.listen(PORT, () => {

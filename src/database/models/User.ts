@@ -1,19 +1,5 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
-
-export interface IUser extends Document {
-  _id: Types.ObjectId;
-  email: string;
-  name: string;
-  lastName: string;
-  nickname: string;
-  avatar?: string;
-  car: string;
-  password: string;
-  rank: string;
-  role: 'user' | 'admin';
-  createdAt: Date;
-  isBanned: boolean;
-}
+import { IUser } from '../../types';
 
 const UserSchema = new Schema<IUser>(
   {
@@ -64,6 +50,14 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+     resetPasswordToken: {
+  type: String,
+  required: false,
+},
+resetPasswordExpiry: {
+  type: Date,
+  required: false,
+},
   },
   { timestamps: true }
 );

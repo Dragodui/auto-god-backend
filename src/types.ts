@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { Document } from 'mongoose';
 
 declare module 'express-serve-static-core' {
@@ -13,15 +13,18 @@ declare module 'express-serve-static-core' {
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
-  nickname?: string;
   name: string;
   lastName: string;
+  nickname: string;
   avatar?: string;
-  rank: string;
-  car?: string;
+  car: string;
   password: string;
-  role: string;
+  rank: string;
+  role: 'user' | 'admin';
   createdAt: Date;
+  resetPasswordToken: string | undefined;
+  resetPasswordExpiry: Date | undefined;
+  isBanned: boolean;
 }
 
 export interface IPost extends Document {
