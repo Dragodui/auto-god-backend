@@ -1,3 +1,4 @@
+// server.ts
 import express, { Express } from 'express';
 import { config } from 'dotenv';
 import MongoStore from 'connect-mongo';
@@ -35,11 +36,15 @@ config();
 
 const app: Express = express();
 const httpServer = createServer(app);
+
+// Configure Socket.IO with proper CORS settings
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_HOST || 'http://localhost:5173',
     methods: ['GET', 'POST'],
+    credentials: true, // This is crucial!
   },
+  allowEIO3: true, // Optional: for backward compatibility
 });
 
 app.use(express.json());
@@ -53,16 +58,24 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: mongoStore,
-    cookie: { secure: false },
+    cookie: { 
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    },
   })
 );
 
+// Configure CORS properly for Express
 app.use(
   cors({
     origin: process.env.CLIENT_HOST || 'http://localhost:5173',
-    credentials: true,
+    credentials: true, // This must match Socket.IO config
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   })
 );
+
 app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
@@ -91,6 +104,12 @@ io.on('connection', (socket) => {
 
   socket.on('join-chat', (chatId) => {
     socket.join(chatId);
+    logger.info(`User ${socket.id} joined chat ${chatId}`);
+  });
+
+  socket.on('leave-chat', (chatId) => {
+    socket.leave(chatId);
+    logger.info(`User ${socket.id} left chat ${chatId}`);
   });
 
   socket.on('disconnect', () => {
@@ -102,8 +121,9 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 verifyEmailConnection();
+
 // Connect to MongoDB
-const PORT = process.env.PORT!;
+const PORT = process.env.PORT || 8000;
 httpServer.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
 });
