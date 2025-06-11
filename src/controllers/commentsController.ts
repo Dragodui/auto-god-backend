@@ -8,6 +8,7 @@ import New from '../database/models/News';
 import User from '../database/models/User';
 import { Types } from 'mongoose';
 import Event from '../database/models/Event';
+import Notification from '../database/models/Notification';
 
 export const createComment = async (
   req: Request,
@@ -49,6 +50,47 @@ export const createComment = async (
       replyTo: replyTo || null,
     });
     await newComment.save();
+
+    // Get the author of the comment for notification
+    const author = await User.findById(authorId).select('name');
+    if (!author) {
+      logger.warn(`Author not found (ID: ${authorId})`);
+      res.status(404).json({ message: 'Author not found' });
+      return;
+    }
+
+    // If this is a reply, send notification to the parent comment's author
+    if (replyTo) {
+      const parentComment = await Comment.findById(replyTo).populate('authorId', '_id');
+      if (parentComment && parentComment.authorId.toString() !== authorId?.toString()) {
+        // Create notification for the parent comment's author
+        const notification = await Notification.create({
+          userId: parentComment.authorId,
+          type: 'reply',
+          content: `${author.name} replied to your comment`,
+          link: `/posts/${postId}#comment-${newComment._id}`,
+        });
+
+        // Emit notification through socket
+        const io = req.app.get('io');
+        io.to(`notifications:${parentComment.authorId}`).emit('notification', notification);
+      }
+    }
+
+    // Send notification to the post author if it's not the same person
+    const postAuthorId = post ? post.authorId : news ? news.authorId : event?.authorId;
+    if (postAuthorId && postAuthorId.toString() !== authorId?.toString()) {
+      const notification = await Notification.create({
+        userId: postAuthorId,
+        type: 'comment',
+        content: `${author.name} commented on your ${post ? 'post' : news ? 'news' : 'event'}`,
+        link: `/posts/${postId}#comment-${newComment._id}`,
+      });
+
+      // Emit notification through socket
+      const io = req.app.get('io');
+      io.to(`notifications:${postAuthorId}`).emit('notification', notification);
+    }
 
     await redisClient.del(`comments:${postId}`);
     await redisClient.del(`post:${postId}`);

@@ -26,6 +26,7 @@ import adminRoutes from './routes/adminRoute';
 import itemRoutes from './routes/itemsRoute';
 import chatRoutes from './routes/chatRoute';
 import eventsRoutes from './routes/eventsRoute';
+import notificationRoutes from './routes/notificationsRoute';
 // redis
 import redisClient from './database/redis';
 //logger
@@ -91,6 +92,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Ensure uploads directory exists
 ensureUploadsDir();
@@ -110,6 +112,16 @@ io.on('connection', (socket) => {
   socket.on('leave-chat', (chatId) => {
     socket.leave(chatId);
     logger.info(`User ${socket.id} left chat ${chatId}`);
+  });
+
+  socket.on('join-notifications', (userId) => {
+    socket.join(`notifications:${userId}`);
+    logger.info(`User ${socket.id} joined notifications room for user ${userId}`);
+  });
+
+  socket.on('leave-notifications', (userId) => {
+    socket.leave(`notifications:${userId}`);
+    logger.info(`User ${socket.id} left notifications room for user ${userId}`);
   });
 
   socket.on('disconnect', () => {
