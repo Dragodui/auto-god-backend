@@ -68,7 +68,7 @@ export const createComment = async (
           userId: parentComment.authorId,
           type: 'reply',
           content: `${author.name} replied to your comment`,
-          link: `/posts/${postId}#comment-${newComment._id}`,
+          link: `/posts/${postId}`,
         });
 
         // Emit notification through socket
@@ -84,7 +84,7 @@ export const createComment = async (
         userId: postAuthorId,
         type: 'comment',
         content: `${author.name} commented on your ${post ? 'post' : news ? 'news' : 'event'}`,
-        link: `/posts/${postId}#comment-${newComment._id}`,
+        link: post ? `/posts/${postId}` : news ? `/news/${postId}` : `/events/${postId}`,
       });
 
       // Emit notification through socket

@@ -37,12 +37,22 @@ config();
 
 const app: Express = express();
 const httpServer = createServer(app);
-
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://26.162.105.70:5173' 
+];
 // Configure Socket.IO with proper CORS settings
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_HOST || 'http://localhost:5173',
-    methods: ['GET', 'POST'],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     credentials: true, // This is crucial!
   },
   allowEIO3: true, // Optional: for backward compatibility
@@ -70,8 +80,14 @@ app.use(
 // Configure CORS properly for Express
 app.use(
   cors({
-    origin: process.env.CLIENT_HOST || 'http://localhost:5173',
-    credentials: true, // This must match Socket.IO config
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   })
